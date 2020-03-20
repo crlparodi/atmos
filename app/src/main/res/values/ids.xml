@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="measurement_view_layout" type="id" />
+
+    <!-- atmos_synthesis -->
+    <item name="atmos_synthesis_fragment" type="id" />
+    <item name="atmos_synthesis_layout" type="id" />
+    <item name="atmos_synthesis_recycler_view" type="id" />
+
+    <!-- atmos_measurement_view -->
+    <item name="atmos_device_name" type="id" />
+    <item name="atmos_device_address" type="id" />
+    <item name="atmos_device_status" type="id" />
+    <item name="atmos_device_measurement" type="id" />
+</resources>

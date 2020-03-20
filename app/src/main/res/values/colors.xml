@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- atmos_color_primary -->
+    <color name="atmos_color_primary">#008080</color>
+    <color name="atmos_color_primary_dark">#008080</color>
+
+    <!-- atmos_color_accents -->
+    <color name="atmos_color_accent">#03DAC5</color>
+
+    <!-- atmos_color_greyshades -->
+    <color name="atmos_color_black">#000000</color>
+    <color name="atmos_color_grey">#AAAAAA</color>
+    <color name="atmos_color_white">#FFFFFF</color>
+</resources>

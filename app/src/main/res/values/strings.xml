@@ -1,0 +1,18 @@
+<resources>
+    <!-- atmos_string_generics -->
+    <string name="app_name">project.atmos</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+    <string name="hello_home_second">Hello HomeSecondFragment. Arg: %1$s</string>
+    <string name="hello_dashboard_second">Hello DashboardSecondFragment. Arg: %1$s</string>
+    <string name="hello_notifications_second">Hello NotificationsSecondFragment. Arg: %1$s</string>
+    <string name="title_home">Synthèse</string>
+    <string name="title_dashboard">Ajout - Suppr.</string>
+    <string name="title_notifications">Paramètres</string>
+
+    <!-- atmos_string_mpeasurement_view -->
+    <string name="atmos_string_device_name">BlackBird</string>
+    <string name="atmos_string_device_address">FF:FF:FF:FF:FF:FF</string>
+    <string name="atmos_string_device_status">Undetermined</string>
+    <string name="atmos_string_device_measurement">90,3°C</string>
+</resources>
