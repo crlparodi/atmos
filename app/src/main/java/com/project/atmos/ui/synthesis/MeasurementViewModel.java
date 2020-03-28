@@ -1,17 +1,17 @@
 package com.project.atmos.ui.synthesis;
 
 import android.app.Application;
-import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.project.atmos.MainActivity;
 import com.project.atmos.core.BLEModulesRepository;
 import com.project.atmos.dev.BLEModulesGeneratorHandler;
 import com.project.atmos.models.BLEModuleObject;
-import com.project.atmos.values.BLEDataType;
 
 import java.util.ArrayList;
 
@@ -30,10 +30,29 @@ public class MeasurementViewModel extends AndroidViewModel{
         this.modulesList = new MutableLiveData<>();
         repository.getAllModules();
         this.modulesList = repository.getModulesList();
+        repository.updateAllModules(modulesList);
+    }
+
+    public void getFinalBLEModuleList(){
+        this.modulesList = repository.getFinalModulesList();
     }
 
     public LiveData<ArrayList<BLEModuleObject>> getBLEModuleList(){
         return repository.getModulesList();
+    }
+
+    public void updateBLEModulesList(){
+        Runnable task = () -> {
+            while(true){
+                getFinalBLEModuleList();
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        new Thread(task).start();
     }
 
 //    public void generate() {

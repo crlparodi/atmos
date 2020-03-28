@@ -1,7 +1,5 @@
 package com.project.atmos.dev;
 
-import android.content.Context;
-
 import com.project.atmos.models.BLEModuleObject;
 import com.project.atmos.values.BLEDataType;
 
@@ -46,6 +44,7 @@ public class BLEModulesGenerator {
         this.module = new BLEModuleObject(null);
         this.module.setName((String) uniqueDataMap.get(BLEDataType.NAME));
         this.module.setAddress((String) uniqueDataMap.get(BLEDataType.ADDRESS));
+        this.module.setStatus((Integer) uniqueDataMap.get(BLEDataType.STATUS));
 
         return this.module;
     }

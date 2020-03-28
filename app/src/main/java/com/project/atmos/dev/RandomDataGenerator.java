@@ -2,6 +2,7 @@ package com.project.atmos.dev;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.util.Log;
 
 import com.project.atmos.Atmos;
 
@@ -108,17 +109,13 @@ public class RandomDataGenerator implements RandomDataGeneratorManager {
     public String getRandomDate() {
         R_DATE = this.RADDLE_GEN.generateDate();
         R_LAST_CONNECT = R_DATE.toString();
-        System.out.println(R_LAST_CONNECT);
         return this.R_LAST_CONNECT;
     }
 
     @Override
     // Random Data
     public Double getRandomTemperature() {
-        while(this.R_TEMP < -50.0 && this.R_TEMP > 60.0){
-            this.R_TEMP = this.randomEngine.nextDouble() * 100;
-            System.out.println("Random heat: " + this.R_TEMP);
-        }
+        this.R_TEMP = 15 + 15 * this.randomEngine.nextDouble();
         return this.R_TEMP;
     }
 }

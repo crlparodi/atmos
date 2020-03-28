@@ -19,7 +19,7 @@ public class BLEModuleObject {
     private String name;
     private String address;
     private Integer lastStatus = 0;
-    private Double temperature = 0.0;
+    private Double value = 0.0;
     private TemperatureUnit unit = CELSIUS;
     private Date lastConnectionDate = null;
 
@@ -75,15 +75,15 @@ public class BLEModuleObject {
         this.address = _address;
     }
 
-    public Integer getLastStatus() {
+    public Integer getStatus() {
         return lastStatus;
     }
 
-    public void refreshStatus(Integer status) { this.lastStatus = status; }
+    public void setStatus(Integer _status) { this.lastStatus = _status; }
 
-    public void setLastAcuiredTemperature(Double _temperatureData){ this.temperature = _temperatureData; }
+    public Double getValue() { return this.value; }
 
-    public Double getTemperature() { return this.temperature; }
+    public void setValue(Double _value){ this.value = _value; }
 
     // Probablement dans une autre classe chargée du traitement des données reçues en bluetooth...
 

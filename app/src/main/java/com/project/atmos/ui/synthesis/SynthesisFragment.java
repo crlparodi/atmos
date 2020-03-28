@@ -50,5 +50,6 @@ public class SynthesisFragment extends Fragment {
         this.recyclerView.setHasFixedSize(true);
         this.recyclerView.setAdapter(listAdapter);
 
+        this.measurementViewModel.updateBLEModulesList();
     }
 }

@@ -1,6 +1,5 @@
 package com.project.atmos.dev;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 
@@ -71,7 +70,7 @@ public class BLEModulesGeneratorHandler extends BLEModulesGenerator {
                     for(Integer i = 0; i < BLEModulesList.size(); i++){
                         super.module.setName(BLEModulesList.get(i).getName());
                         super.module.setAddress(BLEModulesList.get(i).getAddress());
-                        super.module.setLastAcuiredTemperature((Double) super.getRandomPermanentData().get(BLEDataType.TEMP_DATA));
+                        super.module.setValue((Double) super.getRandomPermanentData().get(BLEDataType.TEMP_DATA));
                         BLEModulesList.set(i, module);
                     }
 

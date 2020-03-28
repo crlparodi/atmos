@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.project.atmos.R;
 import com.project.atmos.models.BLEModuleObject;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 public class BLEModuleListAdapter extends RecyclerView.Adapter<BLEModuleListAdapter.BLEModuleListViewHolder> {
@@ -30,8 +32,13 @@ public class BLEModuleListAdapter extends RecyclerView.Adapter<BLEModuleListAdap
         BLEModuleObject currentModule = modulesList.get(position);
         holder.mName.setText(currentModule.getName());
         holder.mAddress.setText(currentModule.getAddress());
-        // holder.mStatus.setText(currentModule.getLastStatus());
-        // holder.mMeasurement.setText(String.format(Double.toString(currentModule.getTemperature())));
+
+        String statusText = (currentModule.getStatus() == 1) ? "Active" : "Not active";
+        holder.mStatus.setText(statusText);
+
+        NumberFormat formater = new DecimalFormat("#0.0");
+        String temperature = formater.format(currentModule.getValue()) + "°C";
+        holder.mMeasurement.setText(temperature);
     }
 
     @Override

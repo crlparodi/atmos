@@ -33,9 +33,6 @@ public class MainActivity extends AppCompatActivity {
 
     private BLEHardwareManager PHomeBluetoothLEHardwareManager;
 
-    public static ArrayList<BLEModuleObject> BLEModulesList = new ArrayList<BLEModuleObject>();
-    public static final Integer NB_OF_DEVICES_GENERATED = 10;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,20 +56,6 @@ public class MainActivity extends AppCompatActivity {
         PHomeBluetoothLEHardwareManager = new BLEHardwareManager(this);
         PHomeBluetoothLEHardwareManager.BluetoothLEHardwareSupport();
         PHomeBluetoothLEHardwareManager.BluetoothLEHardwareEnableRequest();
-
-        // App Cycle Definition and Data Construction
-        switch(config.isCycleStatus()){
-            case DEVELOPMENT:
-                BLEModulesGenerator bdg = new BLEModulesGenerator();
-                BLEModulesList = bdg.generatePackOfDevices(NB_OF_DEVICES_GENERATED);
-                break;
-            case TESTING:
-                break;
-            case PRODUCTION:
-                break;
-            default:
-                break;
-        }
 
         // UI Construction
         // Barre de navigation inférieure
