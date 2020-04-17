@@ -1,4 +1,13 @@
 <resources>
+    <!-- atmos_ble_hardware_manager -->
+    <string name="atmos_ble_hardware_not_supported">Le Bluetooth Low Energy n\'est pas supporté sur ce terminal.</string>
+
+    <!-- atmos_app_permissions_activity -->
+    <string name="atmos_app_permissions_title">Heh ! Pas si vite...</string>
+    <string name="atmos_app_permissions_main">Des autorisations sont nécessaires pour utiliser cette application.</string>
+    <string name="atmos_app_permissions_explain">En effet, cette application utilise une base de données stockée dans votre stockage interne. Prêt à accorder cela ?</string>
+    <string name="atmos_app_permissions_button">Absolument !</string>
+
     <!-- atmos_string_generics -->
     <string name="app_name">project.atmos</string>
     <string name="next">Next</string>
@@ -10,9 +19,16 @@
     <string name="title_dashboard">Ajout - Suppr.</string>
     <string name="title_notifications">Paramètres</string>
 
-    <!-- atmos_string_mpeasurement_view -->
+    <!-- atmos_string_measurement_view -->
     <string name="atmos_string_device_name">BlackBird</string>
     <string name="atmos_string_device_address">FF:FF:FF:FF:FF:FF</string>
     <string name="atmos_string_device_status">Undetermined</string>
     <string name="atmos_string_device_measurement">90,3°C</string>
+
+    <!-- atmos_string_bt_instance_view -->
+    <string name="atmos_string_bt_instance_name">BlackBird</string>
+    <string name="atmos_string_bt_instance_address">FF:FF:FF:FF:FF:FF</string>
+
+    <!-- atmos_modules_manager_fragment -->
+    <string name="atmos_string_mod_manager_discover">Rechercher</string>
 </resources>

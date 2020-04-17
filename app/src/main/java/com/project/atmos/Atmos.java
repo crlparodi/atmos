@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 
 public class Atmos extends Application {
+    public static final String applicationName = "Atmos";
     private static Context context;
 
     @Override

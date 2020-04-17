@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="60dp">
+    <TextView
+        android:id="@id/atmos_bt_instance_name"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text="@string/atmos_string_bt_instance_name"
+        android:textSize="20sp"
+        android:gravity="center|start"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@id/atmos_bt_instance_address">
+    </TextView>
+    <TextView
+        android:id="@id/atmos_bt_instance_address"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text="@string/atmos_string_bt_instance_address"
+        android:gravity="center"
+        android:layout_alignParentEnd="true">
+    </TextView>
+
+</RelativeLayout>

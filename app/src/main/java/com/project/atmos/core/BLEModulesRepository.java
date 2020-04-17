@@ -27,18 +27,29 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class BLEModulesRepository{
+    /* To move later.... */
     private BLEModulesDAO modulesDao;
 
+    /* The final data to send to the ViewModel */
     private MutableLiveData<ArrayList<BLEModuleObject>> modulesList;
 
+    /* App Cycle Status - Mandatory to get the right data... */
+    public static final AppCycleStatus APP_CYCLE_STATUS = MainActivity.config.isCycleStatus();
+
+    /* Async Thread Routines */
     GetAllModulesAsyncTask getAllTask;
     UpdateAllModulesAsyncTask updateAllTask;
 
-    public static final Integer NB_OF_THREADS = 4;
+    /* Executor Thread Services */
+    public static final int NB_OF_THREADS = 4;
     public static final ExecutorService executorService = Executors.newFixedThreadPool(NB_OF_THREADS);
 
-    public static final AppCycleStatus APP_CYCLE_STATUS = MainActivity.config.isCycleStatus();
+    /* Messages ID for the Handler */
+    public static final int MODULES_LIST_GOTTEN_MSG_ID = 0;
+    public static final int MODULES_LIST_UPDATED_MSG_ID = 1;
 
+
+    /* Constructor */
     public BLEModulesRepository(Application application) {
         this.modulesList = new MutableLiveData<>();
         BLEModulesDataBase modulesDatabase = BLEModulesDataBase.getInstance(application);
@@ -47,22 +58,53 @@ public class BLEModulesRepository{
         updateAllTask = new UpdateAllModulesAsyncTask(APP_CYCLE_STATUS);
     }
 
-    private final Handler updateHandler = new Handler(){
+    /*******************************/
+    /* REPOSITORY MODULES HANDLING */
+    /*******************************/
+
+    private static class RepositoryHandler extends Handler {
+
+        BLEModulesRepository repository;
+
+        public RepositoryHandler(BLEModulesRepository repository) {
+            this.repository = repository;
+        }
+
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
 
-            ArrayList<BLEModuleObject> tempModulesList = (ArrayList<BLEModuleObject>) msg.obj;
-            modulesList.setValue(tempModulesList);
+            switch(msg.what) {
+                case MODULES_LIST_GOTTEN_MSG_ID:
+                    break;
+                case MODULES_LIST_UPDATED_MSG_ID:
+                    ArrayList<BLEModuleObject> tempModulesList = (ArrayList<BLEModuleObject>) msg.obj;
+                    repository.setModulesList(tempModulesList);
+                    break;
+            }
         }
-    };
-    public static final int MODULES_LIST_UPDATED = 1;
+    }
 
-    public LiveData<ArrayList<BLEModuleObject>> getFinalModulesList(){
+    private final Handler repositoryHandler = new RepositoryHandler(this);
+
+    /********************/
+    /* GETTER / SETTERS */
+    /********************/
+
+    public LiveData<ArrayList<BLEModuleObject>> getModulesList(){
         return this.modulesList;
     }
 
-    public LiveData<ArrayList<BLEModuleObject>> getModulesList() {
+    public void setModulesList(ArrayList<BLEModuleObject> modulesList){
+        this.modulesList.setValue(modulesList);
+    }
+
+    /************************************************/
+    /* BLE MODULES GENERATION OR RETRIEVAL ROUTINES */
+    /************************************************/
+
+
+    public LiveData<ArrayList<BLEModuleObject>> handleAllModules() {
         try {
             this.modulesList.setValue(getAllTask.get());
         } catch (ExecutionException e) {
@@ -73,8 +115,6 @@ public class BLEModulesRepository{
 
         return this.modulesList;
     }
-
-    /* GET ALL MODULES FOR THE LIVE DATA */
 
     public void getAllModules() {
         getAllTask.execute();
@@ -117,16 +157,17 @@ public class BLEModulesRepository{
         }
     }
 
+    /*******************************/
+    /* BLE MODULES UPDATE ROUTINES */
+    /*******************************/
+
     public void updateAllModules(LiveData<ArrayList<BLEModuleObject>> liveModulesList) {
         ArrayList<BLEModuleObject> modulesList = liveModulesList.getValue();
-
-        System.out.println("Am i launched ?");
 
         Callable<ArrayList<BLEModuleObject>> permanentTask = () -> {
             while(true){
                 UpdateAllModulesAsyncTask asyncTask = new UpdateAllModulesAsyncTask(APP_CYCLE_STATUS);
                 asyncTask.execute(modulesList);
-                System.out.println("AsyncTask Launched");
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
@@ -134,9 +175,8 @@ public class BLEModulesRepository{
                 }
                 ArrayList<BLEModuleObject> tempModulesList = asyncTask.get();
 
-                Message msg = updateHandler.obtainMessage(MODULES_LIST_UPDATED, modulesList);
-                updateHandler.sendMessage(msg);
-                System.out.println("Message sent.");
+                Message msg = this.repositoryHandler.obtainMessage(MODULES_LIST_UPDATED_MSG_ID, modulesList);
+                this.repositoryHandler.sendMessage(msg);
             }
         };
 
@@ -146,14 +186,11 @@ public class BLEModulesRepository{
     private static class UpdateAllModulesAsyncTask extends AsyncTask<ArrayList<BLEModuleObject>, Void, ArrayList<BLEModuleObject>>{
         AppCycleStatus appCycleStatus;
 
-        private Handler handler;
-
         private BLEValuesGenerator valuesGenerator;
 
         private BLEModuleObject module;
 
         private ArrayList<BLEModuleObject> modulesList;
-        private ListIterator<BLEModuleObject> modulesListIterator;
 
         private UpdateAllModulesAsyncTask(AppCycleStatus cycleStatus){
             appCycleStatus = cycleStatus;

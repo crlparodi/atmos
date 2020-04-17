@@ -2,6 +2,9 @@
 <resources>
     <item name="measurement_view_layout" type="id" />
 
+    <!-- atmos_app_config -->
+    <item name="atmos_app_config_button" type="id" />
+
     <!-- atmos_synthesis -->
     <item name="atmos_synthesis_fragment" type="id" />
     <item name="atmos_synthesis_layout" type="id" />
@@ -12,4 +15,17 @@
     <item name="atmos_device_address" type="id" />
     <item name="atmos_device_status" type="id" />
     <item name="atmos_device_measurement" type="id" />
+
+    <!-- atmos_mod_manager -->
+    <item name="atmos_mod_layout" type="id" />
+    <item name="atmos_mod_search" type="id" />
+    <item name="atmos_mod_relative_layout" type="id" />
+    <item name="atmos_mod_bt_desc" type="id" />
+    <item name="atmos_mod_bt_enable" type="id" />
+    <item name="atmos_mod_recycler_view" type="id" />
+    <item name="atmos_mod_manager_discover_btn" type="id" />
+
+    <!-- atmos_bluetooth_instance_view -->
+    <item name="atmos_bt_instance_name" type="id" />
+    <item name="atmos_bt_instance_address" type="id" />
 </resources>

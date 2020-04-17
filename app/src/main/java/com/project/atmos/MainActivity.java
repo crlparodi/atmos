@@ -2,14 +2,15 @@ package com.project.atmos;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.project.atmos.config.Config;
-import com.project.atmos.dev.BLEModulesGenerator;
 import com.project.atmos.libs.BLEHardwareManager;
-import com.project.atmos.models.BLEModuleObject;
+import com.project.atmos.values.AtmosStrings;
 import com.project.atmos.values.PermissionRequestCode;
 import com.project.atmos.values.Tags;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -23,39 +24,29 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.appcompat.widget.Toolbar;
 
-import java.util.ArrayList;
+import java.security.Permission;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static Context context;
-
     public static Config config;
 
-    private BLEHardwareManager PHomeBluetoothLEHardwareManager;
+    public static Context context;
+
+    private BLEHardwareManager bleHardwareManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        this.context = this;
+        context = this;
 
-        this.config = new Config();
-        this.config.load();
-
-        // Filesystem Permission Request
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
-            Log.i(Tags.getTag(Tags.API_PERMISSION_INFO), "The following permission: WRITE_EXTERNAL_STORAGE, is not granted. Asking the permission now.");
-            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PermissionRequestCode.REQUEST_WRITE_EXTERNAL_STORAGE);
-        }
-        else {
-            Log.i(Tags.getTag(Tags.API_PERMISSION_INFO), "The following permission: WRITE_EXTERNAL_STORAGE, is successfully granted by the user");
-        }
+        config = new Config();
+        config.load();
 
         // Bluetooth LE Permission Request
-        PHomeBluetoothLEHardwareManager = new BLEHardwareManager(this);
-        PHomeBluetoothLEHardwareManager.BluetoothLEHardwareSupport();
-        PHomeBluetoothLEHardwareManager.BluetoothLEHardwareEnableRequest();
+        bleHardwareManager = new BLEHardwareManager(this);
+        bleHardwareManager.enableDisableBT(true);
 
         // UI Construction
         // Barre de navigation inférieure
@@ -76,6 +67,30 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
     }
 
+    public BLEHardwareManager getBleHardwareManager(){
+        return this.bleHardwareManager;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        /**
+         * We absolutely want to check the storage writing permission, this one is very essential
+         * Without this one, the app will crash...
+         */
+
+        if(checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, android.os.Process.myPid(), android.os.Process.myUid()) < 0){
+            startActivity(new Intent(this, AppPermissionsActivity.class));
+            finish();
+        }
+    }
+
+    @Override
+    public int checkPermission(String permission, int pid, int uid) {
+        return super.checkPermission(permission, pid, uid);
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -84,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        int PHomeProcessId = android.os.Process.myPid();
-        android.os.Process.killProcess(PHomeProcessId);
+        int AtmosProcessID = android.os.Process.myPid();
+        android.os.Process.killProcess(AtmosProcessID);
     }
 }

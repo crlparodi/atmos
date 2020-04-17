@@ -1,19 +1,27 @@
 package com.project.atmos.ui.modules_manager;
 
+import android.app.Application;
+import android.bluetooth.BluetoothDevice;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
-public class ModulesManagerViewModel extends ViewModel {
+import com.project.atmos.core.DeviceDiscoveryRepository;
+import com.project.atmos.libs.BLEHardwareManager;
 
-    private MutableLiveData<String> mText;
+import java.util.ArrayList;
 
-    public ModulesManagerViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is dashboard fragment");
+public class ModulesManagerViewModel extends AndroidViewModel {
+    public static final String TAG = "ModulesManagerViewModel";
+
+    public ModulesManagerViewModel(@NonNull Application application) {
+        super(application);
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    public LiveData<ArrayList<BluetoothDevice>> getmDeviceslist() {
+        return DeviceDiscoveryRepository.instance().getMDevicesList();
     }
 }

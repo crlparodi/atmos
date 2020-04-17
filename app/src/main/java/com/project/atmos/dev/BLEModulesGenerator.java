@@ -17,15 +17,6 @@ public class BLEModulesGenerator {
         this.dataGenerator = new RandomDataGenerator();
     }
 
-    public EnumMap<BLEDataType, Object> getRandomPermanentData(){
-        EnumMap<BLEDataType, Object> permanentDataMap = new EnumMap<BLEDataType, Object>(BLEDataType.class);
-        if(!permanentDataMap.isEmpty()) permanentDataMap.clear();
-
-        permanentDataMap.put(BLEDataType.TEMP_DATA, dataGenerator.getRandomTemperature());
-
-        return permanentDataMap;
-    }
-
     public EnumMap<BLEDataType, Object> getRandomUniqueData(){
         EnumMap<BLEDataType, Object> uniqueDataMap = new EnumMap<BLEDataType, Object>(BLEDataType.class);
         if(!uniqueDataMap.isEmpty()) uniqueDataMap.clear();
