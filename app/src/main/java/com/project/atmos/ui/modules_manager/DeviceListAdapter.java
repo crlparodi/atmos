@@ -32,7 +32,6 @@ public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.De
     public void onBindViewHolder(@NonNull DeviceListViewHolder holder, int position) {
 //        android.os.Debug.waitForDebugger();
         BluetoothDevice device = mDeviceslist.get(position);
-        Log.d(TAG, "onBindViewHolder: " + holder);
         holder.mName.setText(device.getName());
         holder.mAddress.setText(device.getAddress());
     }

@@ -69,7 +69,7 @@ public class ModulesManagerFragment extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bleHardwareManager.btDiscovery();
+                bleHardwareManager.btLeScan(true);
             }
         });
 
@@ -79,7 +79,6 @@ public class ModulesManagerFragment extends Fragment {
     public final Observer<ArrayList<BluetoothDevice>> getmDeviceslistObserver = new Observer<ArrayList<BluetoothDevice>>() {
         @Override
         public void onChanged(ArrayList<BluetoothDevice> bluetoothDevices) {
-            Log.d(TAG, "onChanged: Setting Bluetooth Devices List");
             mDeviceListAdapter.setmDeviceslist(bluetoothDevices);
         }
     };
@@ -88,7 +87,6 @@ public class ModulesManagerFragment extends Fragment {
     public void onStart() {
         super.onStart();
         DeviceDiscoveryRepository.instance().addDevicesList(bleHardwareManager.getmDevicesList());
-
     }
 
     @Override
@@ -96,20 +94,19 @@ public class ModulesManagerFragment extends Fragment {
         super.onResume();
         IntentFilter intentFilter = new IntentFilter(AtmosStrings.MAIN_ACTIVITY);
         getActivity().registerReceiver(broadcastReceiver, intentFilter);
-
     }
 
     @Override
     public void onPause() {
         super.onPause();
         getActivity().unregisterReceiver(broadcastReceiver);
-        bleHardwareManager.btDiscoveryStop();
     }
 
     @Override
     public void onStop() {
         super.onStop();
         DeviceDiscoveryRepository.instance().removeDevicesList(bleHardwareManager.getmDevicesList());
+        mDeviceListAdapter.setmDeviceslist(null);
 
     }
 

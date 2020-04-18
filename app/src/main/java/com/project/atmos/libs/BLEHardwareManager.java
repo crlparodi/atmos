@@ -2,11 +2,19 @@ package com.project.atmos.libs;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Handler;
+import android.os.Parcel;
+import android.os.ParcelUuid;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -14,10 +22,11 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.project.atmos.R;
-import com.project.atmos.core.DeviceDiscoveryRepository;
+import com.project.atmos.values.AtmosConstants;
 import com.project.atmos.values.AtmosStrings;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class BLEHardwareManager {
     public static final String TAG = "BLEHardwareManager";
@@ -25,9 +34,13 @@ public class BLEHardwareManager {
     private Context context;
 
     protected BluetoothAdapter btAdapter;
+    protected BluetoothLeScanner mmScanner;
 
     private ArrayList<BluetoothDevice> mDevices;
     private MutableLiveData<ArrayList<BluetoothDevice>> mDevicesList;
+
+    private Handler handler;
+
 
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -39,6 +52,7 @@ public class BLEHardwareManager {
                 setmDevicesList(mDevices);
             }
             if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+//                android.os.Debug.waitForDebugger();
                 final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
                 Intent uiUpdateIntent = new Intent();
                 uiUpdateIntent.setAction(AtmosStrings.MAIN_ACTIVITY);
@@ -49,13 +63,11 @@ public class BLEHardwareManager {
                         Log.d(TAG, "onReceive: Sending STATE ON");
                         uiUpdateIntent.putExtra(AtmosStrings.BLE_STATE_CHANGED, true);
                         context.sendBroadcast(uiUpdateIntent);
-                        btDiscovery();
                         break;
                     case BluetoothAdapter.STATE_OFF:
                         Log.d(TAG, "onReceive: Sending STATE OFF");
                         uiUpdateIntent.putExtra(AtmosStrings.BLE_STATE_CHANGED, false);
                         context.sendBroadcast(uiUpdateIntent);
-                        btDiscoveryStop();
                         break;
                 }
             }
@@ -64,6 +76,7 @@ public class BLEHardwareManager {
 
     public BLEHardwareManager(Context context) {
         this.context = context;
+        this.handler = new Handler();
         this.btAdapter = BluetoothAdapter.getDefaultAdapter();
         this.mDevices = new ArrayList<>();
         this.mDevicesList = new MutableLiveData<>();
@@ -108,23 +121,52 @@ public class BLEHardwareManager {
         }
     }
 
-    public void btDiscovery() {
-        IntentFilter discoveryDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        if (btAdapter.isDiscovering()) {
-            btAdapter.cancelDiscovery();
-            mDevices.clear();
+    public void btLeScan(final boolean enable) {
+        ScanCallback mmScanCallback = new ScanCallback() {
+            @Override
+            public void onScanResult(int callbackType, ScanResult result) {
+                super.onScanResult(callbackType, result);
+                if(!mDevices.contains(result.getDevice())){
+                    mDevices.add(result.getDevice());
+                    setmDevicesList(mDevices);
+                }
+            }
 
-            this.context.registerReceiver(broadcastReceiver, discoveryDevicesIntent);
-            btAdapter.startDiscovery();
+            @Override
+            public void onScanFailed(int errorCode) {
+                super.onScanFailed(errorCode);
+                Log.d(TAG, "onScanFailed: Failed to Scan any Bluetooth LE device");
+            }
+        };
+
+        mDevices.clear();
+
+        if (btAdapter.isEnabled()) {
+            mmScanner = btAdapter.getBluetoothLeScanner();
+
+            ScanSettings mmScanSettings = new ScanSettings.Builder()
+                    .setScanMode(ScanSettings.SCAN_MODE_BALANCED)
+                    .setReportDelay(0)
+                    .build();
+
+            ScanFilter mmScanFilter = new ScanFilter.Builder()
+                    .build();
+            List<ScanFilter> mmFilters = new ArrayList<>();
+            mmFilters.add(mmScanFilter);
+
+            if (enable) {
+                handler.postDelayed(() -> {
+                    if (mmScanner != null) {
+                        mmScanner.stopScan(mmScanCallback);
+                    }
+                }, AtmosConstants.BLUETOOTH_LE_SCAN_PERIOD);
+
+                mmScanner.startScan(mmFilters, mmScanSettings, mmScanCallback);
+            } else {
+                mmScanner.stopScan(mmScanCallback);
+            }
         } else {
-            mDevices.clear();
-
-            this.context.registerReceiver(broadcastReceiver, discoveryDevicesIntent);
-            btAdapter.startDiscovery();
+            Toast.makeText(this.context, AtmosStrings.ToastMessages.BLE_STATE_NOT_ACTIVE, Toast.LENGTH_SHORT).show();
         }
-    }
-
-    public void btDiscoveryStop() {
-        btAdapter.cancelDiscovery();
     }
 }

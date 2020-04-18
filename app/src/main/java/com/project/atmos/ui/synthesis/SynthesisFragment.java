@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.project.atmos.R;
+import com.project.atmos.libs.BLEHardwareManager;
 import com.project.atmos.models.BLEModuleObject;
 
 import java.util.ArrayList;

@@ -44,10 +44,6 @@ public class MainActivity extends AppCompatActivity {
         config = new Config();
         config.load();
 
-        // Bluetooth LE Permission Request
-        bleHardwareManager = new BLEHardwareManager(this);
-        bleHardwareManager.enableDisableBT(true);
-
         // UI Construction
         // Barre de navigation inférieure
         BottomNavigationView navView = findViewById(R.id.nav_view);
