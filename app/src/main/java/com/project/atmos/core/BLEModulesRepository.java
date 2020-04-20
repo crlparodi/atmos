@@ -1,6 +1,7 @@
 package com.project.atmos.core;
 
 import android.app.Application;
+import android.bluetooth.BluetoothDevice;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
@@ -26,7 +27,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class BLEModulesRepository{
+public class BLEModulesRepository implements DataBaseRepositoryManager{
     /* To move later.... */
     private BLEModulesDAO modulesDao;
 
@@ -217,5 +218,27 @@ public class BLEModulesRepository{
 
             return this.modulesList;
         }
+    }
+
+    /*******************************/
+    /* DATA BASE REPO. MANAGER     */
+    /*******************************/
+
+    public void insertModule(BLEModuleObject mModule){
+        BLEModulesDataBase.dataBaseWriteExecutor.execute(() -> {
+            modulesDao.insert(new BLEModuleEntity(
+                    mModule.getAddress(),
+                    mModule.getName()
+            ));
+        });
+    }
+
+    public void insertModule(BluetoothDevice mmModule){
+        BLEModulesDataBase.dataBaseWriteExecutor.execute(() -> {
+            modulesDao.insert(new BLEModuleEntity(
+                    mmModule.getAddress(),
+                    mmModule.getName()
+            ));
+        });
     }
 }

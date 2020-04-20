@@ -53,4 +53,11 @@ public class BLEModuleEntity {
         this.name = name;
         this.lastConnection = lastConnection;
     }
+
+    @Ignore
+    public BLEModuleEntity(@NonNull String address, String name) {
+        this.address = address;
+        this.name = name;
+        this.lastConnection = " ";
+    }
 }

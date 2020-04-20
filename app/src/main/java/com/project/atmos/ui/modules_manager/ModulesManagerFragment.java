@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -64,6 +65,14 @@ public class ModulesManagerFragment extends Fragment {
         this.mDeviceListAdapter = new DeviceListAdapter();
         this.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         this.recyclerView.setAdapter(mDeviceListAdapter);
+
+        mDeviceListAdapter.setOnItemClickListener(new DeviceListAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(BluetoothDevice device) {
+                Toast.makeText(getContext(), "Module inserted into the database, go to Synthesis to connect with it", Toast.LENGTH_SHORT).show();
+                modulesManagerViewModel.insertModule(device);
+            }
+        });
 
         Button button = root.findViewById(R.id.atmos_mod_manager_discover_btn);
         button.setOnClickListener(new View.OnClickListener() {
