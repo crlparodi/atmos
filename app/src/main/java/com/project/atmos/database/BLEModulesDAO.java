@@ -19,7 +19,7 @@ public interface BLEModulesDAO {
     @Query("SELECT * FROM ble_modules WHERE name = :name")
     public BLEModuleEntity getByName(String name);
 
-    @Query("SELECT * FROM ble_modules WHERE name = :address")
+    @Query("SELECT * FROM ble_modules WHERE address = :address")
     public BLEModuleEntity getByAddress(String address);
 
     @Insert
@@ -28,8 +28,8 @@ public interface BLEModulesDAO {
     @Update
     public void update(BLEModuleEntity module);
 
-    @Delete
-    public void delete(BLEModuleEntity module);
+    @Query("DELETE from ble_modules WHERE address = :address")
+    public void delete(String address);
 
     @Query("DELETE from ble_modules")
     public void clear();

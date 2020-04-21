@@ -5,10 +5,20 @@
     <!-- atmos_app_config -->
     <item name="atmos_app_config_button" type="id" />
 
+    <!-- atmos_navigation -->
+    <item name="navigation_synthesis" type="id" />
+    <item name="navigation_mod_manager" type="id" />
+    <item name="navigation_settings" type="id" />
+
     <!-- atmos_synthesis -->
     <item name="atmos_synthesis_fragment" type="id" />
     <item name="atmos_synthesis_layout" type="id" />
     <item name="atmos_synthesis_recycler_view" type="id" />
+
+    <!-- atmos_synthesis_oc_menu -->
+    <item name="atmos_oc_menu_connect" type="id" />
+    <item name="atmos_oc_menu_update" type="id" />
+    <item name="atmos_oc_menu_delete" type="id" />
 
     <!-- atmos_measurement_view -->
     <item name="atmos_device_name" type="id" />

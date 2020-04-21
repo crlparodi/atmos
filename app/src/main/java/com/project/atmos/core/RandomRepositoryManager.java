@@ -2,7 +2,7 @@ package com.project.atmos.core;
 
 import androidx.annotation.NonNull;
 
-import com.project.atmos.models.BLEModuleObject;
+import com.project.atmos.models.BLEModuleEntity;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public interface RandomRepositoryManager {
     // BLEModuleObject getRandom(Integer position);
     // BLEModuleObject getRandomByName(String name);
     // BLEModuleObject getRandomByAddress(String Address);
-    List<BLEModuleObject> getRandomAll();
+    List<BLEModuleEntity> getRandomAll();
 
     void deleteRandom();
     void deleteRandomAtPosition(Integer position);

@@ -1,6 +1,7 @@
 package com.project.atmos.models;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -19,6 +20,13 @@ public class BLEModuleEntity {
 
     @ColumnInfo(name = "last_connection")
     public String lastConnection;
+
+    @Nullable
+    @ColumnInfo(name = "last_temp_estimation")
+    public double lastTempEstimation;
+
+    /* Non-indexed attributes */
+    public int status = 0;
 
     @NonNull
     public String getAddress() {
@@ -44,6 +52,18 @@ public class BLEModuleEntity {
     public void setLastConnection(String lastConnection) {
         this.lastConnection = lastConnection;
     }
+
+    public double getLastTempEstimation() {
+        return lastTempEstimation;
+    }
+
+    public void setLastTempEstimation(double lastTempEstimation) {
+        this.lastTempEstimation = lastTempEstimation;
+    }
+
+    public int getStatus() { return this.status; }
+
+    public void setStatus( int status ) { this.status = status; }
 
     public BLEModuleEntity() {}
 

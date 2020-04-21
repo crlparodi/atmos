@@ -69,7 +69,6 @@ public class ModulesManagerFragment extends Fragment {
         mDeviceListAdapter.setOnItemClickListener(new DeviceListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BluetoothDevice device) {
-                Toast.makeText(getContext(), "Module inserted into the database, go to Synthesis to connect with it", Toast.LENGTH_SHORT).show();
                 modulesManagerViewModel.insertModule(device);
             }
         });
