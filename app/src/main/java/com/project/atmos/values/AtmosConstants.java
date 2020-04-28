@@ -11,4 +11,11 @@ public class AtmosConstants {
         public static final ParcelUuid MY_UUID_INSECURE =
                 ParcelUuid.fromString("8591f7e0-1a84-473a-9b21-acc9dded3ca4");
     }
+
+    public static java.util.UUID convertFromInteger(int i) {
+        final long MSB = 0x0000000000001000L;
+        final long LSB = 0x800000805f9b34fbL;
+        long value = i & 0xFFFFFFFF;
+        return new java.util.UUID(MSB | (value << 32), LSB);
+    }
 }

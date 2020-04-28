@@ -1,19 +1,13 @@
 package com.project.atmos.ui.modules_manager;
 
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -25,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.project.atmos.R;
 import com.project.atmos.core.DeviceDiscoveryRepository;
 import com.project.atmos.libs.BLEHardwareManager;
-import com.project.atmos.values.AtmosStrings;
 
 import java.util.ArrayList;
 
@@ -36,7 +29,7 @@ public class ModulesManagerFragment extends Fragment {
     private BLEHardwareManager bleHardwareManager;
 
     RecyclerView recyclerView;
-    DeviceListAdapter mDeviceListAdapter;
+    ModulesManagerListAdapter mListAdapter;
     private ModulesManagerViewModel modulesManagerViewModel;
 
     ArrayList<BluetoothDevice> bluetoothDevices;
@@ -62,11 +55,11 @@ public class ModulesManagerFragment extends Fragment {
         });
 
         this.recyclerView = root.findViewById(R.id.atmos_mod_recycler_view);
-        this.mDeviceListAdapter = new DeviceListAdapter();
+        this.mListAdapter = new ModulesManagerListAdapter();
         this.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        this.recyclerView.setAdapter(mDeviceListAdapter);
+        this.recyclerView.setAdapter(mListAdapter);
 
-        mDeviceListAdapter.setOnItemClickListener(new DeviceListAdapter.OnItemClickListener() {
+        mListAdapter.setOnItemClickListener(new ModulesManagerListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BluetoothDevice device) {
                 modulesManagerViewModel.insertModule(device);
@@ -87,7 +80,7 @@ public class ModulesManagerFragment extends Fragment {
     public final Observer<ArrayList<BluetoothDevice>> getmDeviceslistObserver = new Observer<ArrayList<BluetoothDevice>>() {
         @Override
         public void onChanged(ArrayList<BluetoothDevice> bluetoothDevices) {
-            mDeviceListAdapter.setmDeviceslist(bluetoothDevices);
+            mListAdapter.setmDeviceslist(bluetoothDevices);
         }
     };
 
@@ -98,35 +91,11 @@ public class ModulesManagerFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        IntentFilter intentFilter = new IntentFilter(AtmosStrings.MAIN_ACTIVITY);
-        getActivity().registerReceiver(broadcastReceiver, intentFilter);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        getActivity().unregisterReceiver(broadcastReceiver);
-    }
-
-    @Override
     public void onStop() {
         super.onStop();
         DeviceDiscoveryRepository.instance().removeDevicesList(bleHardwareManager.getmDevicesList());
-        mDeviceListAdapter.setmDeviceslist(null);
+        mListAdapter.setmDeviceslist(null);
 
     }
 
-    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(AtmosStrings.MAIN_ACTIVITY)) {
-                final boolean state = intent.getBooleanExtra(AtmosStrings.BLE_STATE_CHANGED, false);
-                Log.d(TAG, "onReceive: Change STATE");
-                btSwitch.setChecked(state);
-            }
-        }
-    };
 }

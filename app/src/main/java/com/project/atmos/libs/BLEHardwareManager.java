@@ -41,7 +41,6 @@ public class BLEHardwareManager {
 
     private Handler handler;
 
-
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -88,6 +87,10 @@ public class BLEHardwareManager {
 
     public void setmDevicesList(ArrayList<BluetoothDevice> mDevicesList) {
         this.mDevicesList.setValue(mDevicesList);
+    }
+
+    public BroadcastReceiver getBroadcastReceiver() {
+        return broadcastReceiver;
     }
 
     public static boolean checkBTSupport(Context context) {

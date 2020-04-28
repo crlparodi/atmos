@@ -16,8 +16,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 
-public class BLEModuleListAdapter extends RecyclerView.Adapter<BLEModuleListAdapter.BLEModuleListViewHolder>{
-    public static final String TAG = BLEModuleListAdapter.class.getSimpleName();
+public class SynthesisListAdapter extends RecyclerView.Adapter<SynthesisListAdapter.BLEModuleListViewHolder>{
+    public static final String TAG = SynthesisListAdapter.class.getSimpleName();
 
     ArrayList<BLEModuleEntity> modulesList = new ArrayList<>();
 
@@ -34,7 +34,12 @@ public class BLEModuleListAdapter extends RecyclerView.Adapter<BLEModuleListAdap
     @Override
     public void onBindViewHolder(@NonNull BLEModuleListViewHolder holder, int position) {
         BLEModuleEntity currentModule = modulesList.get(position);
-        holder.mName.setText(currentModule.getName());
+
+        if(currentModule.getName() != null)
+            holder.mName.setText(currentModule.getName());
+        else
+            holder.mName.setText("-unnamed-");
+
         holder.mAddress.setText(currentModule.getAddress());
 
         String statusText = (currentModule.getStatus() == 1) ? "Active" : "Not active";
@@ -48,6 +53,15 @@ public class BLEModuleListAdapter extends RecyclerView.Adapter<BLEModuleListAdap
     @Override
     public int getItemCount() {
         return this.modulesList.size();
+    }
+
+    public BLEModuleEntity getItem(int position) {
+        return modulesList.get(position);
+    }
+
+    public void updateItem(int position, BLEModuleEntity mModule){
+        modulesList.set(position, mModule);
+        notifyItemChanged(position);
     }
 
     public void removeItem(int position){
@@ -87,6 +101,7 @@ public class BLEModuleListAdapter extends RecyclerView.Adapter<BLEModuleListAdap
             int position = getAdapterPosition();
             menu.setHeaderTitle(modulesList.get(position).getName());
             menu.add(0, R.id.atmos_oc_menu_connect, position, R.string.atmos_oc_connect);
+            menu.add(0, R.id.atmos_oc_menu_disconnect, position, R.string.atmos_oc_disconnect);
             menu.add(0, R.id.atmos_oc_menu_update, position, R.string.atmos_oc_update);
             menu.add(0, R.id.atmos_oc_menu_delete, position, R.string.atmos_oc_delete);
         }
@@ -103,7 +118,7 @@ public class BLEModuleListAdapter extends RecyclerView.Adapter<BLEModuleListAdap
         void onLongClick(View v, int position);
     }
 
-    public void setOnLongClickListener(BLEModuleListAdapter.OnLongClickListener listener) {
+    public void setOnLongClickListener(SynthesisListAdapter.OnLongClickListener listener) {
         this.listener = listener;
     }
 }

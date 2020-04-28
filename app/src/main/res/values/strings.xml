@@ -23,6 +23,7 @@
 
     <!-- atmos_synth_fragment_oc_menu -->
     <string name="atmos_oc_connect">Connecter</string>
+    <string name="atmos_oc_disconnect">Déconnecter</string>
     <string name="atmos_oc_update">Modifier</string>
     <string name="atmos_oc_delete">Supprimer</string>
 

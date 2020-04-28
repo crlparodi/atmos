@@ -7,9 +7,11 @@ public class AtmosStrings {
     public static final String MAIN_ACTIVITY = "com.project.atmos.MainActivity";
 
     /* Fragments */
+    public static final String SYNTHESIS_FRAGMENT = "com.project.atmos.ui.synthesis.SynthesisFragment";
 
     /* States */
     public static final String BLE_STATE_CHANGED = "BLE_STATE_CHANGED";
+    public static final String BLE_STATUS_CHANGED = "BLE_STATUS_CHANGED";
 
     public static class ToastMessages{
         /* Messages */

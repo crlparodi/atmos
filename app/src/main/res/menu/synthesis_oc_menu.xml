@@ -5,6 +5,10 @@
         android:title="@string/atmos_oc_connect" />
 
     <item
+        android:id="@id/atmos_oc_menu_disconnect"
+        android:title="@string/atmos_oc_disconnect" />
+
+    <item
         android:id="@id/atmos_oc_menu_update"
         android:title="@string/atmos_oc_update" />
 

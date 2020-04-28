@@ -17,6 +17,7 @@
 
     <!-- atmos_synthesis_oc_menu -->
     <item name="atmos_oc_menu_connect" type="id" />
+    <item name="atmos_oc_menu_disconnect" type="id" />
     <item name="atmos_oc_menu_update" type="id" />
     <item name="atmos_oc_menu_delete" type="id" />
 

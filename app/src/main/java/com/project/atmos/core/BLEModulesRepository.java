@@ -199,6 +199,7 @@ public class BLEModulesRepository implements DataBaseRepositoryManager {
 
     /* DATA BASE REPOSITORY MANAGER */
 
+    @Override
     public void insertModule(BluetoothDevice mmModule) {
         BLEModulesDataBase.dataBaseWriteExecutor.execute(() -> {
             BLEModuleEntity module = mDAO.getByAddress(mmModule.getAddress());

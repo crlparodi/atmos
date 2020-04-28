@@ -1,7 +1,6 @@
 package com.project.atmos.ui.modules_manager;
 
 import android.bluetooth.BluetoothDevice;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,7 @@ import com.project.atmos.R;
 
 import java.util.ArrayList;
 
-public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.DeviceListViewHolder> {
+public class ModulesManagerListAdapter extends RecyclerView.Adapter<ModulesManagerListAdapter.DeviceListViewHolder> {
     public static final String TAG = "DeviceListAdapter";
 
     ArrayList<BluetoothDevice> mDeviceslist = new ArrayList<>();
@@ -30,9 +29,13 @@ public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.De
 
     @Override
     public void onBindViewHolder(@NonNull DeviceListViewHolder holder, int position) {
-//        android.os.Debug.waitForDebugger();
         BluetoothDevice device = mDeviceslist.get(position);
-        holder.mName.setText(device.getName());
+
+        if(device.getName() != null)
+            holder.mName.setText(device.getName());
+        else
+            holder.mName.setText("-unnamed-");
+
         holder.mAddress.setText(device.getAddress());
     }
 

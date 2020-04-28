@@ -1,29 +1,59 @@
 package com.project.atmos;
 
 import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothGatt;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
-
-import com.project.atmos.config.Config;
-import com.project.atmos.libs.BLEHardwareManager;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import android.util.Log;
+import android.widget.Switch;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import androidx.appcompat.widget.Toolbar;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.project.atmos.config.Config;
+import com.project.atmos.libs.BLEHardwareManager;
+import com.project.atmos.values.AtmosStrings;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
+    public static final String TAG = MainActivity.class.getSimpleName();
 
     public static Config config;
 
     public static Context context;
 
-    private BLEHardwareManager bleHardwareManager;
+    private BLEHardwareManager mManager;
+
+    private Map<String, BluetoothGatt> mGattMap;
+    private Iterator mIterator;
+
+    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(AtmosStrings.MAIN_ACTIVITY)) {
+                final boolean state = intent.getBooleanExtra(AtmosStrings.BLE_STATE_CHANGED, false);
+                Log.d(TAG, "onReceive: Change STATE");
+                Switch btSwitch = findViewById(R.id.atmos_mod_bt_enable);
+                if(btSwitch != null){
+                    btSwitch.setChecked(state);
+                }
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +64,10 @@ public class MainActivity extends AppCompatActivity {
 
         config = new Config();
         config.load();
+
+        mManager = new BLEHardwareManager(this);
+
+        mGattMap = new HashMap<>();
 
         // UI Construction
         // Barre de navigation inférieure
@@ -54,23 +88,83 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
     }
 
-    public BLEHardwareManager getBleHardwareManager(){
-        return this.bleHardwareManager;
+    @Override
+    public void onStart() {
+        super.onStart();
+        /* TODO:  Observer pourquoi les BroadcastsReceivers ne s'activent pas dès le lancement de l'appli*/
+        IntentFilter btIntentFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        registerReceiver(mManager.getBroadcastReceiver(), btIntentFilter);
+
+        IntentFilter intentFilter = new IntentFilter(AtmosStrings.MAIN_ACTIVITY);
+        registerReceiver(broadcastReceiver, intentFilter);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        /* TODO:  Observer pourquoi les BroadcastsReceivers ne s'activent pas dès le lancement de l'appli*/
+        IntentFilter btIntentFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        registerReceiver(mManager.getBroadcastReceiver(), btIntentFilter);
+
+        IntentFilter intentFilter = new IntentFilter(AtmosStrings.MAIN_ACTIVITY);
+        registerReceiver(broadcastReceiver, intentFilter);
 
         /**
          * We absolutely want to check the storage writing permission, this one is very essential
          * Without this one, the app will crash...
          */
 
-        if(checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, android.os.Process.myPid(), android.os.Process.myUid()) < 0){
+        if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, android.os.Process.myPid(), android.os.Process.myUid()) < 0) {
             startActivity(new Intent(this, AppPermissionsActivity.class));
             finish();
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        /* TODO:  Observer pourquoi les BroadcastsReceivers ne s'activent pas dès le lancement de l'appli*/
+        unregisterReceiver(broadcastReceiver);
+        unregisterReceiver(mManager.getBroadcastReceiver());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        /* TODO:  Observer pourquoi les BroadcastsReceivers ne s'activent pas dès le lancement de l'appli*/
+        unregisterReceiver(broadcastReceiver);
+        unregisterReceiver(mManager.getBroadcastReceiver());
+
+        Log.d(TAG, "onStop: BluetoothGatt disconnections:");
+
+        mIterator = mGattMap.entrySet().iterator();
+        while(mIterator.hasNext()){
+            Map.Entry mMapEntry = (Map.Entry) mIterator.next();
+            BluetoothGatt mGattForClosure = (BluetoothGatt) mMapEntry.getValue();
+            mGattForClosure.disconnect();
+            String mAddress = (String) mMapEntry.getKey();
+            Log.d(TAG, "onStop: Disconnecting " + mAddress);
+            mGattMap.remove(mAddress);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        int AtmosProcessID = android.os.Process.myPid();
+        android.os.Process.killProcess(AtmosProcessID);
+    }
+
+    public BluetoothGatt getGatt(String mAdrress) {
+        return this.mGattMap.get(mAdrress);
+    }
+
+    public void putGatt(String mAddress, BluetoothGatt mGatt){
+        this.mGattMap.put(mAddress, mGatt);
+    }
+
+    public void removeGatt(String mAddress, BluetoothGatt mGatt){
+        this.mGattMap.remove(mAddress, mGatt);
     }
 
     @Override
@@ -83,10 +177,5 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        int AtmosProcessID = android.os.Process.myPid();
-        android.os.Process.killProcess(AtmosProcessID);
-    }
+
 }
