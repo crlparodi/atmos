@@ -17,6 +17,7 @@ import com.project.atmos.libs.CustomAdaptableDialog;
 import com.project.atmos.values.PermissionRequestCode;
 
 public class AppPermissionsActivity extends AppCompatActivity {
+    public static final String TAG = AppPermissionsActivity.class.getSimpleName();
 
     public static final int REQUESTS_APPLICATION_GLOBAL = 0;
 
@@ -90,6 +91,6 @@ public class AppPermissionsActivity extends AppCompatActivity {
                     }
                 }
         );
-        dialog.show(getSupportFragmentManager(), "PERMISSION_REQUEST_FAILURE");
+        dialog.show(getSupportFragmentManager(), TAG);
     }
 }

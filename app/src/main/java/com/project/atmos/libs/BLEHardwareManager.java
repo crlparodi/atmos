@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BLEHardwareManager {
-    public static final String TAG = "BLEHardwareManager";
+    public static final String TAG = BLEHardwareManager.class.getSimpleName();
 
     private Context context;
 
@@ -51,7 +51,6 @@ public class BLEHardwareManager {
                 setmDevicesList(mDevices);
             }
             if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
-//                android.os.Debug.waitForDebugger();
                 final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
                 Intent uiUpdateIntent = new Intent();
                 uiUpdateIntent.setAction(AtmosStrings.MAIN_ACTIVITY);
@@ -79,6 +78,10 @@ public class BLEHardwareManager {
         this.btAdapter = BluetoothAdapter.getDefaultAdapter();
         this.mDevices = new ArrayList<>();
         this.mDevicesList = new MutableLiveData<>();
+    }
+
+    public BluetoothAdapter getBtAdapter() {
+        return btAdapter;
     }
 
     public LiveData<ArrayList<BluetoothDevice>> getmDevicesList() {

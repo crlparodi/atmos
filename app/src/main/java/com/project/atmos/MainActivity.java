@@ -21,7 +21,10 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.project.atmos.config.Config;
+import com.project.atmos.database.BLEModulesDAO;
+import com.project.atmos.database.BLEModulesDataBase;
 import com.project.atmos.libs.BLEHardwareManager;
+import com.project.atmos.models.BLEModuleEntity;
 import com.project.atmos.values.AtmosStrings;
 
 import java.util.HashMap;
@@ -37,7 +40,8 @@ public class MainActivity extends AppCompatActivity {
 
     private BLEHardwareManager mManager;
 
-    private Map<String, BluetoothGatt> mGattMap;
+    private HashMap<String, BluetoothGatt> mGattMap;
+
     private Iterator mIterator;
 
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -48,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
                 final boolean state = intent.getBooleanExtra(AtmosStrings.BLE_STATE_CHANGED, false);
                 Log.d(TAG, "onReceive: Change STATE");
                 Switch btSwitch = findViewById(R.id.atmos_mod_bt_enable);
-                if(btSwitch != null){
+                if (btSwitch != null) {
                     btSwitch.setChecked(state);
                 }
             }
@@ -69,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
         mGattMap = new HashMap<>();
 
+
         // UI Construction
         // Barre de navigation inférieure
         BottomNavigationView navView = findViewById(R.id.nav_view);
@@ -86,12 +91,7 @@ public class MainActivity extends AppCompatActivity {
         // Custom Toolbar
         Toolbar toolbar = findViewById(R.id.atmos_toolbar);
         setSupportActionBar(toolbar);
-    }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        /* TODO:  Observer pourquoi les BroadcastsReceivers ne s'activent pas dès le lancement de l'appli*/
         IntentFilter btIntentFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         registerReceiver(mManager.getBroadcastReceiver(), btIntentFilter);
 
@@ -100,14 +100,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        /* TODO:  Observer pourquoi les BroadcastsReceivers ne s'activent pas dès le lancement de l'appli*/
-        IntentFilter btIntentFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-        registerReceiver(mManager.getBroadcastReceiver(), btIntentFilter);
-
-        IntentFilter intentFilter = new IntentFilter(AtmosStrings.MAIN_ACTIVITY);
-        registerReceiver(broadcastReceiver, intentFilter);
+    protected void onRestart() {
+        super.onRestart();
 
         /**
          * We absolutely want to check the storage writing permission, this one is very essential
@@ -121,50 +115,68 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onPause() {
+    protected void onPause() {
         super.onPause();
-        /* TODO:  Observer pourquoi les BroadcastsReceivers ne s'activent pas dès le lancement de l'appli*/
-        unregisterReceiver(broadcastReceiver);
-        unregisterReceiver(mManager.getBroadcastReceiver());
     }
 
     @Override
-    public void onStop() {
+    protected void onStop() {
         super.onStop();
-        /* TODO:  Observer pourquoi les BroadcastsReceivers ne s'activent pas dès le lancement de l'appli*/
-        unregisterReceiver(broadcastReceiver);
-        unregisterReceiver(mManager.getBroadcastReceiver());
 
-        Log.d(TAG, "onStop: BluetoothGatt disconnections:");
+        if (isFinishing()) {
+            mIterator = mGattMap.entrySet().iterator();
+            while (mIterator.hasNext()) {
+                Map.Entry mMapEntry = (Map.Entry) mIterator.next();
 
-        mIterator = mGattMap.entrySet().iterator();
-        while(mIterator.hasNext()){
-            Map.Entry mMapEntry = (Map.Entry) mIterator.next();
-            BluetoothGatt mGattForClosure = (BluetoothGatt) mMapEntry.getValue();
-            mGattForClosure.disconnect();
-            String mAddress = (String) mMapEntry.getKey();
-            Log.d(TAG, "onStop: Disconnecting " + mAddress);
-            mGattMap.remove(mAddress);
+                BluetoothGatt mGattForClosure = (BluetoothGatt) mMapEntry.getValue();
+                mGattForClosure.disconnect();
+
+                String mAddress = (String) mMapEntry.getKey();
+                mGattMap.remove(mAddress);
+            }
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        mGattMap.clear();
+
+        if (broadcastReceiver.isOrderedBroadcast() || mManager.getBroadcastReceiver().isOrderedBroadcast()) {
+            unregisterReceiver(broadcastReceiver);
+            unregisterReceiver(mManager.getBroadcastReceiver());
+        }
+
         int AtmosProcessID = android.os.Process.myPid();
         android.os.Process.killProcess(AtmosProcessID);
+    }
+
+    public BLEHardwareManager getmManager() {
+        return mManager;
     }
 
     public BluetoothGatt getGatt(String mAdrress) {
         return this.mGattMap.get(mAdrress);
     }
 
-    public void putGatt(String mAddress, BluetoothGatt mGatt){
+    public void putGatt(String mAddress, BluetoothGatt mGatt) {
         this.mGattMap.put(mAddress, mGatt);
     }
 
-    public void removeGatt(String mAddress, BluetoothGatt mGatt){
-        this.mGattMap.remove(mAddress, mGatt);
+    public void removeGatt(String mAddress) {
+        this.mGattMap.remove(mAddress);
+        Log.d(TAG, "removeGatt: removed");
+    }
+
+    public void showDebug(){
+        mIterator = mGattMap.entrySet().iterator();
+        while (mIterator.hasNext()) {
+            Map.Entry mMapEntry = (Map.Entry) mIterator.next();
+            String mAddress = (String) mMapEntry.getKey();
+            BluetoothGatt mGattForDebug = (BluetoothGatt) mMapEntry.getValue();
+            Log.d(TAG, "showDebug: ADDR: " + mAddress + ", GATT: " + mGattForDebug);
+        }
     }
 
     @Override
@@ -176,6 +188,4 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
-
-
 }

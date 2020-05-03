@@ -4,6 +4,7 @@ import android.os.ParcelUuid;
 
 public class AtmosConstants {
     public static final int BLUETOOTH_LE_SCAN_PERIOD = 10000;
+    public static final int BLUETOOTH_LE_CONNECT_PERIOD = 3000;
 
     public static class UUID{
         public static final ParcelUuid MY_UUID_SECURE =
