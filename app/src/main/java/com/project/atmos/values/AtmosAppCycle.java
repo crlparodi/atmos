@@ -1,6 +1,6 @@
 package com.project.atmos.values;
 
-public enum AppCycleStatus {
+public enum AtmosAppCycle {
     DEVELOPMENT,
     TESTING,
     PRODUCTION

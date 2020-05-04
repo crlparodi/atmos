@@ -16,7 +16,7 @@ import com.project.atmos.database.BLEModulesDAO;
 import com.project.atmos.database.BLEModulesDataBase;
 import com.project.atmos.dev.BLEModulesGenerator;
 import com.project.atmos.models.BLEModuleEntity;
-import com.project.atmos.values.AppCycleStatus;
+import com.project.atmos.values.AtmosAppCycle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ public class BLEModulesRepository implements DataBaseRepositoryManager {
     private MutableLiveData<ArrayList<BLEModuleEntity>> mList;
 
     /* App Cycle Status - Mandatory to get the right data... */
-    public static final AppCycleStatus APP_CYCLE_STATUS = MainActivity.config.isCycleStatus();
+    public static final AtmosAppCycle APP_CYCLE_STATUS = MainActivity.config.isCycleStatus();
 
     /* Async Thread Routines */
 //    UpdateAllModulesAsyncTask updateAllTask;

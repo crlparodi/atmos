@@ -43,8 +43,6 @@ public class BLEHardwareConnection extends BluetoothGattCallback {
 //    public static final UUID CUSTOM_CHARACTERISTIC_USER_DESC_UUID = AtmosConstants.convertFromInteger(0x2901);
     public static final UUID CUSTOM_CHARACTERISTIC_CONFIG_UUID = AtmosConstants.convertFromInteger(0x2902);
 
-    ExecutorService mExecutor = Executors.newSingleThreadExecutor();
-
     private Context mContext;
 
     public BLEHardwareConnection(Context context) {
@@ -52,8 +50,6 @@ public class BLEHardwareConnection extends BluetoothGattCallback {
         this.mDAO = BLEModulesDataBase.getInstance(context).dataAccessObject();
         this.mContext = context;
     }
-
-
 
     @Override
     public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -143,7 +139,6 @@ public class BLEHardwareConnection extends BluetoothGattCallback {
     @Override
     public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
         super.onDescriptorRead(gatt, descriptor, status);
-
     }
 
     public BluetoothGatt connect(BluetoothAdapter mAdapter, String mAddress){
@@ -167,7 +162,8 @@ public class BLEHardwareConnection extends BluetoothGattCallback {
     }
 
     public void onConnectionFailed(BluetoothDevice mDevice, String mAddress){
-        this.mExecutor.execute(() -> {
+        ExecutorService mExecutor = Executors.newSingleThreadExecutor();
+        mExecutor.execute(() -> {
             BLEModuleEntity mModule = mDAO.getByAddress(mAddress);
             mModule.setStatus(0);
             mDAO.update(mModule);

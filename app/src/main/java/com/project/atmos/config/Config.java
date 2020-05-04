@@ -1,21 +1,19 @@
 package com.project.atmos.config;
 
-import android.content.Context;
 import android.content.res.AssetManager;
-import android.nfc.Tag;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.project.atmos.MainActivity;
-import com.project.atmos.values.AppCycleStatus;
-import com.project.atmos.values.Tags;
+import com.project.atmos.values.AtmosAppCycle;
 
 import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
 
 public class Config {
+    public static final String TAG = Config.class.getSimpleName();
+
     private Properties config;
 
     private AssetManager assetMgr;
@@ -23,7 +21,7 @@ public class Config {
     private InputStream is = null;
 
     private boolean debugStatus = false;
-    private AppCycleStatus cycleStatus = AppCycleStatus.DEVELOPMENT;
+    private AtmosAppCycle cycleStatus = AtmosAppCycle.DEVELOPMENT;
 
     public Config(){
         this.config = new Properties();
@@ -34,7 +32,7 @@ public class Config {
         return this.debugStatus;
     }
 
-    public AppCycleStatus isCycleStatus(){
+    public AtmosAppCycle isCycleStatus(){
         return this.cycleStatus;
     }
 
@@ -51,7 +49,7 @@ public class Config {
             return;
         }
 
-        Log.d(Tags.getTag(Tags.MAIN), "Configuration info are retrieved successfully.");
+        Log.d(TAG, "Configuration info are retrieved successfully.");
     }
 
     private void getDebugStatus() throws IllegalArgumentException{
@@ -68,13 +66,13 @@ public class Config {
         String appCycleStatus = config.getProperty("CYCLE_STATUS");
         switch(appCycleStatus){
             case "DEVELOPMENT":
-                this.cycleStatus = AppCycleStatus.DEVELOPMENT;
+                this.cycleStatus = AtmosAppCycle.DEVELOPMENT;
                 break;
             case "TESTING":
-                this.cycleStatus = AppCycleStatus.TESTING;
+                this.cycleStatus = AtmosAppCycle.TESTING;
                 break;
             case "PRODUCTION":
-                this.cycleStatus = AppCycleStatus.PRODUCTION;
+                this.cycleStatus = AtmosAppCycle.PRODUCTION;
                 break;
             default:
                 throw new IllegalArgumentException();

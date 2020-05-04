@@ -1,7 +1,5 @@
 package com.project.atmos.values;
 
-import java.util.UUID;
-
 public class AtmosStrings {
     /* Activities */
     public static final String MAIN_ACTIVITY = "com.project.atmos.MainActivity";
@@ -17,7 +15,15 @@ public class AtmosStrings {
     public static final String BLE_TIMEOUT_REACHED = "BLE_TIMEOUT_REACHED";
     public static final String BLE_CONNECTION_LOST = "BLE_CONNECTION_LOST";
 
+    /* Data-Type */
+    public static final String NAME = "name";
+    public static final String ADDRESS = "address";
+    public static final String STATUS = "status";
+    public static final String MEASUREMENT = "measurement";
+    public static final String UNIT = "unit";
+    public static final String LAST_CONNECTION_DATE = "last_connection_date";
 
+    /* Toasts */
     public static class ToastMessages{
         /* Messages */
         // Français

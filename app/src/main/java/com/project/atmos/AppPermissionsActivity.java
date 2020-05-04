@@ -2,7 +2,6 @@ package com.project.atmos;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.DialogInterface;
@@ -14,7 +13,6 @@ import android.widget.Button;
 
 import com.project.atmos.libs.BLEHardwareManager;
 import com.project.atmos.libs.CustomAdaptableDialog;
-import com.project.atmos.values.PermissionRequestCode;
 
 public class AppPermissionsActivity extends AppCompatActivity {
     public static final String TAG = AppPermissionsActivity.class.getSimpleName();
