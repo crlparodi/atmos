@@ -4,7 +4,7 @@ import android.app.Application;
 import android.content.Context;
 
 public class Atmos extends Application {
-    public static final String applicationName = "Atmos";
+    public static final String TAG = Atmos.class.getSimpleName();
     private static Context context;
 
     @Override

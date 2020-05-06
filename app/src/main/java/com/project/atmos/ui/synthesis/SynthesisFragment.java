@@ -50,7 +50,9 @@ public class SynthesisFragment extends Fragment implements SynthesisListAdapter.
         public void onReceive(Context context, Intent intent) {
             String mAction = intent.getAction();
             if (AtmosStrings.SYNTHESIS_FRAGMENT.equals(mAction)) {
-                BLEModuleEntity mModule = listAdapter.getItem(mCurrentClickPosition);
+                String mAddress = intent.getStringExtra(AtmosStrings.BLE_MODULE_ADDRESS);
+                BLEModuleEntity mModule = listAdapter.getItemByAddress(mAddress);
+                int position = listAdapter.getPositionByAddress(mAddress);
                 if (intent.hasExtra(AtmosStrings.BLE_STATUS_CHANGED)) {
                     Boolean extra = (Boolean) intent.getBooleanExtra(AtmosStrings.BLE_STATUS_CHANGED, false);
                     if (extra) {
@@ -74,7 +76,13 @@ public class SynthesisFragment extends Fragment implements SynthesisListAdapter.
                     ((MainActivity) getActivity()).removeGatt(extra);
                     ((MainActivity) getActivity()).showDebug();
                 }
-                listAdapter.updateItem(mCurrentClickPosition, mModule);
+                if(intent.hasExtra(AtmosStrings.BLE_DATA_UPDATED)) {
+                    mModule.setLastTempEstimation(intent.getDoubleExtra(
+                            AtmosStrings.BLE_DATA_UPDATED,
+                            mModule.getLastTempEstimation()
+                    ));
+                }
+                listAdapter.updateItem(position, mModule);
             }
         }
     };
@@ -111,12 +119,7 @@ public class SynthesisFragment extends Fragment implements SynthesisListAdapter.
         this.recyclerView.setAdapter(listAdapter);
         registerForContextMenu(this.recyclerView);
 
-        this.listAdapter.setOnLongClickListener(new SynthesisListAdapter.OnLongClickListener() {
-            @Override
-            public void onLongClick(View v, int position) {
-                mCurrentClickPosition = position;
-            }
-        });
+        this.listAdapter.setOnLongClickListener(this);
     }
 
     @Override
@@ -165,6 +168,11 @@ public class SynthesisFragment extends Fragment implements SynthesisListAdapter.
             case R.id.atmos_oc_menu_update:
                 return true;
             case R.id.atmos_oc_menu_delete:
+                BluetoothGatt mGattForRemove = ((MainActivity) getActivity()).getGatt(mAddress);
+                if (mGattForRemove != null) {
+                    mGattForRemove.disconnect();
+                    ((MainActivity) getActivity()).removeGatt(mAddress);
+                }
                 this.mViewModel.delete(mModuleEntity.getAddress());
                 this.listAdapter.removeItem(mCurrentClickPosition);
                 Toast.makeText(getContext(), "Module supprimé", Toast.LENGTH_SHORT).show();

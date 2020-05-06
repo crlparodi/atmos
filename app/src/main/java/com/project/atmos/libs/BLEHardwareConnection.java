@@ -6,8 +6,6 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattServer;
-import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
@@ -16,13 +14,14 @@ import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 
+import com.project.atmos.core.BLEDataComputer;
 import com.project.atmos.database.BLEModulesDAO;
 import com.project.atmos.database.BLEModulesDataBase;
 import com.project.atmos.models.BLEModuleEntity;
 import com.project.atmos.values.AtmosConstants;
 import com.project.atmos.values.AtmosStrings;
+import com.project.atmos.models.BLECharacteristicData;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -38,6 +37,8 @@ public class BLEHardwareConnection extends BluetoothGattCallback {
 
     private Handler handler = new Handler();
 
+    private BLEDataComputer mComputer;
+
     public static final UUID CUSTOM_SERVICE_UUID = AtmosConstants.convertFromInteger(0xFFE0);
     public static final UUID CUSTOM_CHARACTERISTIC_UUID = AtmosConstants.convertFromInteger(0xFFE1);
 //    public static final UUID CUSTOM_CHARACTERISTIC_USER_DESC_UUID = AtmosConstants.convertFromInteger(0x2901);
@@ -48,6 +49,7 @@ public class BLEHardwareConnection extends BluetoothGattCallback {
     public BLEHardwareConnection(Context context) {
         mArrayList = new ArrayList<>();
         this.mDAO = BLEModulesDataBase.getInstance(context).dataAccessObject();
+        this.mComputer = new BLEDataComputer();
         this.mContext = context;
     }
 
@@ -78,6 +80,7 @@ public class BLEHardwareConnection extends BluetoothGattCallback {
         }
 
         mDAO.update(mModule);
+        mStatusUpdateIntent.putExtra(AtmosStrings.BLE_MODULE_ADDRESS, gatt.getDevice().getAddress());
         mContext.sendBroadcast(mStatusUpdateIntent);
     }
 
@@ -118,9 +121,19 @@ public class BLEHardwareConnection extends BluetoothGattCallback {
     @Override
     public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
         super.onCharacteristicChanged(gatt, characteristic);
-        byte[] value = characteristic.getValue();
-        String value2 = new BigInteger(1, value).toString(16);
-        Log.d(TAG, "onCharacteristicRead: Value: " + value2);
+        BLECharacteristicData characteristicData = mComputer.computeCharacteristic(characteristic);
+        double temperature = mComputer.computeData(characteristicData);
+
+        BluetoothDevice mmDevice = gatt.getDevice();
+        BLEModuleEntity mDevice = mDAO.getByAddress(mmDevice.getAddress());
+        mDevice.setLastTempEstimation(temperature);
+
+        Intent mStatusUpdateIntent = new Intent(AtmosStrings.SYNTHESIS_FRAGMENT);
+        mStatusUpdateIntent.setAction(AtmosStrings.SYNTHESIS_FRAGMENT);
+        mStatusUpdateIntent.putExtra(AtmosStrings.BLE_MODULE_ADDRESS, mmDevice.getAddress());
+        mStatusUpdateIntent.putExtra(AtmosStrings.BLE_DATA_UPDATED, temperature);
+        mContext.sendBroadcast(mStatusUpdateIntent);
+
     }
 
     @Override
@@ -171,6 +184,7 @@ public class BLEHardwareConnection extends BluetoothGattCallback {
 
         Intent mStatusUpdateIntent = new Intent(AtmosStrings.SYNTHESIS_FRAGMENT);
         mStatusUpdateIntent.setAction(AtmosStrings.SYNTHESIS_FRAGMENT);
+        mStatusUpdateIntent.putExtra(AtmosStrings.BLE_MODULE_ADDRESS, mDevice.getAddress());
         mStatusUpdateIntent.putExtra(AtmosStrings.BLE_TIMEOUT_REACHED, mAddress);
         mContext.sendBroadcast(mStatusUpdateIntent);
     }

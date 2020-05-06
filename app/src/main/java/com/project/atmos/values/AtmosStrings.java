@@ -12,8 +12,10 @@ public class AtmosStrings {
     public static final String BLE_STATUS_CHANGED = "BLE_STATUS_CHANGED";
 
     /* Other-Extras */
+    public static final String BLE_MODULE_ADDRESS = "BLE_MODULE_ADDRESS";
     public static final String BLE_TIMEOUT_REACHED = "BLE_TIMEOUT_REACHED";
     public static final String BLE_CONNECTION_LOST = "BLE_CONNECTION_LOST";
+    public static final String BLE_DATA_UPDATED = "BLE_DATA_UPDATED";
 
     /* Data-Type */
     public static final String NAME = "name";

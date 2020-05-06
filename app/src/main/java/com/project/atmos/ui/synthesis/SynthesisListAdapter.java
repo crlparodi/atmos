@@ -9,15 +9,20 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.project.atmos.MainActivity;
 import com.project.atmos.R;
 import com.project.atmos.models.BLEModuleEntity;
+import com.project.atmos.values.AtmosAppCycle;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class SynthesisListAdapter extends RecyclerView.Adapter<SynthesisListAdapter.BLEModuleListViewHolder>{
     public static final String TAG = SynthesisListAdapter.class.getSimpleName();
+
+    public static final AtmosAppCycle APP_CYCLE_STATUS = MainActivity.config.isCycleStatus();
 
     ArrayList<BLEModuleEntity> modulesList = new ArrayList<>();
 
@@ -57,6 +62,31 @@ public class SynthesisListAdapter extends RecyclerView.Adapter<SynthesisListAdap
 
     public BLEModuleEntity getItem(int position) {
         return modulesList.get(position);
+    }
+
+    public int getPositionByAddress(String mAddress){
+        int position = 0;
+        BLEModuleEntity mModule = null;
+        Iterator it = modulesList.listIterator();
+        while(it.hasNext()){
+            mModule = (BLEModuleEntity) it.next();
+            if(mAddress.equals(mModule.getAddress())){
+                position = modulesList.indexOf(mModule);
+            }
+        }
+        return position;
+    }
+
+    public BLEModuleEntity getItemByAddress(String mAddress){
+        BLEModuleEntity mModule = null;
+        Iterator it = modulesList.listIterator();
+        while(it.hasNext()){
+            mModule = (BLEModuleEntity) it.next();
+            if(mAddress.equals(mModule.getAddress())){
+                break;
+            }
+        }
+        return mModule;
     }
 
     public void updateItem(int position, BLEModuleEntity mModule){
@@ -100,8 +130,10 @@ public class SynthesisListAdapter extends RecyclerView.Adapter<SynthesisListAdap
         public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo){
             int position = getAdapterPosition();
             menu.setHeaderTitle(modulesList.get(position).getName());
-            menu.add(0, R.id.atmos_oc_menu_connect, position, R.string.atmos_oc_connect);
-            menu.add(0, R.id.atmos_oc_menu_disconnect, position, R.string.atmos_oc_disconnect);
+            if(APP_CYCLE_STATUS == AtmosAppCycle.PRODUCTION){
+                menu.add(0, R.id.atmos_oc_menu_connect, position, R.string.atmos_oc_connect);
+                menu.add(0, R.id.atmos_oc_menu_disconnect, position, R.string.atmos_oc_disconnect);
+            }
             menu.add(0, R.id.atmos_oc_menu_update, position, R.string.atmos_oc_update);
             menu.add(0, R.id.atmos_oc_menu_delete, position, R.string.atmos_oc_delete);
         }

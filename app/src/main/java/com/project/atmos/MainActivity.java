@@ -62,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
         context = this;
 
@@ -73,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
         mGattMap = new HashMap<>();
 
+        setContentView(R.layout.activity_main);
 
         // UI Construction
         // Barre de navigation inférieure
@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
 
         IntentFilter intentFilter = new IntentFilter(AtmosStrings.MAIN_ACTIVITY);
         registerReceiver(broadcastReceiver, intentFilter);
+
     }
 
     @Override

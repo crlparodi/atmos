@@ -56,6 +56,8 @@ public class BLEModulesRepository implements DataBaseRepositoryManager {
     public static final int MODULES_LIST_UPDATED_MSG_ID = 1;
     public static final int MODULE_ADDED_MSG_ID = 2;
     public static final int MODULE_ALREADY_ADDED_MSG_ID = 3;
+    public static final int MODULE_UPDATED_MSG_ID = 4;
+    public static final int MODULE_UNKNOWN_MSG_ID = 5;
 
     /* REPOSITORY MODULES HANDLING */
 
@@ -212,6 +214,42 @@ public class BLEModulesRepository implements DataBaseRepositoryManager {
                 msg.what = MODULE_ADDED_MSG_ID;
             } else {
                 msg.what = MODULE_ALREADY_ADDED_MSG_ID;
+            }
+            repositoryHandler.sendMessage(msg);
+        });
+    }
+
+    @Override
+    public void updateModule(BluetoothDevice mmModule, int status) {
+        BLEModulesDataBase.dataBaseWriteExecutor.execute(() -> {
+            BLEModuleEntity module = mDAO.getByAddress(mmModule.getAddress());
+            Message msg = repositoryHandler.obtainMessage();
+            if (module == null) {
+                msg.what = MODULE_UNKNOWN_MSG_ID;
+            } else {
+                module.setStatus(status);
+                module.setName(mmModule.getName());
+                module.setAddress(mmModule.getAddress());
+                mDAO.update(module);
+                msg.what = MODULE_UPDATED_MSG_ID;
+            }
+            repositoryHandler.sendMessage(msg);
+        });
+    }
+
+    @Override
+    public void updateModule(BLEModuleEntity mmModule) {
+        BLEModulesDataBase.dataBaseWriteExecutor.execute(() -> {
+            BLEModuleEntity module = mDAO.getByAddress(mmModule.getAddress());
+            Message msg = repositoryHandler.obtainMessage();
+            if (module == null) {
+                msg.what = MODULE_UNKNOWN_MSG_ID;
+            } else {
+                module.setStatus(mmModule.getStatus());
+                module.setName(mmModule.getName());
+                module.setAddress(mmModule.getAddress());
+                mDAO.update(module);
+                msg.what = MODULE_UPDATED_MSG_ID;
             }
             repositoryHandler.sendMessage(msg);
         });

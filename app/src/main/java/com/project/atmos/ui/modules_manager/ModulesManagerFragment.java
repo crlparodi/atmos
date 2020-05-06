@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -58,6 +59,9 @@ public class ModulesManagerFragment extends Fragment {
         this.mListAdapter = new ModulesManagerListAdapter();
         this.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         this.recyclerView.setAdapter(mListAdapter);
+
+        DividerItemDecoration itemDecor = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
+        recyclerView.addItemDecoration(itemDecor);
 
         mListAdapter.setOnItemClickListener(new ModulesManagerListAdapter.OnItemClickListener() {
             @Override
