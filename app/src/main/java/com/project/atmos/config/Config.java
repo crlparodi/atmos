@@ -6,6 +6,7 @@ import android.widget.Toast;
 
 import com.project.atmos.MainActivity;
 import com.project.atmos.values.AtmosAppCycle;
+import com.project.atmos.values.AtmosStrings;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
@@ -21,7 +22,7 @@ public class Config {
     private InputStream is = null;
 
     private boolean debugStatus = false;
-    private AtmosAppCycle cycleStatus = AtmosAppCycle.DEVELOPMENT;
+    private AtmosAppCycle cycleStatus = AtmosAppCycle.DEMO;
 
     public Config(){
         this.config = new Properties();
@@ -45,7 +46,7 @@ public class Config {
             this.getCycleStatus();
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(MainActivity.context, "Failed to retrieve configuration from app.config", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.context, AtmosStrings.ToastMessages.APP_CONFIG_NOT_FOUND, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -66,7 +67,7 @@ public class Config {
         String appCycleStatus = config.getProperty("CYCLE_STATUS");
         switch(appCycleStatus){
             case "DEVELOPMENT":
-                this.cycleStatus = AtmosAppCycle.DEVELOPMENT;
+                this.cycleStatus = AtmosAppCycle.DEMO;
                 break;
             case "TESTING":
                 this.cycleStatus = AtmosAppCycle.TESTING;

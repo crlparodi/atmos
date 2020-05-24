@@ -2,12 +2,12 @@ package com.project.atmos.models;
 
 import androidx.annotation.NonNull;
 
-public class BLECharacteristicData {
+public class BluetoothCharacteristicData {
     private final String characteristicType;
     private final String characteristicSpec;
-    private final double characteristicValue;
+    private final int characteristicValue;
 
-    public BLECharacteristicData(@NonNull String characteristicType, String characteristicSpec, double characteristicValue) {
+    public BluetoothCharacteristicData(@NonNull String characteristicType, String characteristicSpec, int characteristicValue) {
         this.characteristicType = characteristicType;
         this.characteristicSpec = characteristicSpec;
         this.characteristicValue = characteristicValue;
@@ -21,7 +21,7 @@ public class BLECharacteristicData {
         return characteristicSpec;
     }
 
-    public double getCharacteristicValue() {
+    public int getCharacteristicValue() {
         return characteristicValue;
     }
 }

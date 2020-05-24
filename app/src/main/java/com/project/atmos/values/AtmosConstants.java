@@ -9,6 +9,11 @@ public class AtmosConstants {
     public static final int BLUETOOTH_KTY_SENSOR = 0x41;
     public static final int BLUETOOTH_DS18_SENSOR = 0x42;
 
+    /* Incomplete UUID Integers */
+//    public static final int CUSTOM_SERVICE_UUID = 0xFFE0;
+//    public static final int CUSTOM_CHARACTERISTIC_UUID = 0xFFE1;
+//    public static final int CUSTOM_CHARACTERISTIC_CONFIG_UUID = 0x2902;
+
     /* UUID converter */
     public static java.util.UUID convertFromInteger(int i) {
         final long MSB = 0x0000000000001000L;

@@ -7,20 +7,20 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
-import com.project.atmos.core.BLEModulesRepository;
+import com.project.atmos.core.BluetoothDeviceRepository;
 import com.project.atmos.core.DeviceDiscoveryRepository;
-import com.project.atmos.database.BLEModulesDAO;
+import com.project.atmos.ui.synthesis.SynthesisListAdapter;
 
 import java.util.ArrayList;
 
 public class ModulesManagerViewModel extends AndroidViewModel {
     public static final String TAG = "ModulesManagerViewModel";
 
-    BLEModulesRepository mRepository;
+    BluetoothDeviceRepository mRepository;
 
     public ModulesManagerViewModel(@NonNull Application application) {
         super(application);
-        mRepository = new BLEModulesRepository(application);
+        mRepository = new BluetoothDeviceRepository(application);
     }
 
     public LiveData<ArrayList<BluetoothDevice>> getmDeviceslist() {

@@ -1,5 +1,6 @@
 package com.project.atmos.libs;
 
+import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -14,13 +15,12 @@ import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 
-import com.project.atmos.core.BLEDataComputer;
-import com.project.atmos.database.BLEModulesDAO;
-import com.project.atmos.database.BLEModulesDataBase;
-import com.project.atmos.models.BLEModuleEntity;
+import com.project.atmos.core.BluetoothDataComputer;
+import com.project.atmos.core.BluetoothDeviceRepository;
+import com.project.atmos.models.BluetoothCharacteristicData;
+import com.project.atmos.models.BluetoothDeviceInfo;
 import com.project.atmos.values.AtmosConstants;
 import com.project.atmos.values.AtmosStrings;
-import com.project.atmos.models.BLECharacteristicData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,26 +31,27 @@ import java.util.concurrent.Executors;
 public class BLEHardwareConnection extends BluetoothGattCallback {
     public static final String TAG = BLEHardwareConnection.class.getSimpleName();
 
-    private List<BluetoothGattService> mArrayList;
+    private List<BluetoothGattService> mServicesList;
 
-    private BLEModulesDAO mDAO;
+    private BluetoothDeviceRepository mRepository;
 
-    private Handler handler = new Handler();
+    private Handler mHandler = new Handler();
 
-    private BLEDataComputer mComputer;
+    private BluetoothDataComputer mComputer;
 
     public static final UUID CUSTOM_SERVICE_UUID = AtmosConstants.convertFromInteger(0xFFE0);
     public static final UUID CUSTOM_CHARACTERISTIC_UUID = AtmosConstants.convertFromInteger(0xFFE1);
-//    public static final UUID CUSTOM_CHARACTERISTIC_USER_DESC_UUID = AtmosConstants.convertFromInteger(0x2901);
     public static final UUID CUSTOM_CHARACTERISTIC_CONFIG_UUID = AtmosConstants.convertFromInteger(0x2902);
+
+    public static final int GATT_INTERNAL_ERROR = 0x129;
 
     private Context mContext;
 
-    public BLEHardwareConnection(Context context) {
-        mArrayList = new ArrayList<>();
-        this.mDAO = BLEModulesDataBase.getInstance(context).dataAccessObject();
-        this.mComputer = new BLEDataComputer();
-        this.mContext = context;
+    public BLEHardwareConnection(Application application) {
+        mServicesList = new ArrayList<>();
+        this.mRepository = new BluetoothDeviceRepository(application);
+        this.mComputer = new BluetoothDataComputer();
+        this.mContext = application;
     }
 
     @Override
@@ -60,27 +61,28 @@ public class BLEHardwareConnection extends BluetoothGattCallback {
         Intent mStatusUpdateIntent = new Intent(AtmosStrings.SYNTHESIS_FRAGMENT);
         mStatusUpdateIntent.setAction(AtmosStrings.SYNTHESIS_FRAGMENT);
         String mAddress = gatt.getDevice().getAddress();
-        BLEModuleEntity mModule = mDAO.getByAddress(mAddress);
+        BluetoothDeviceInfo mModule = mRepository.getByAddress(mAddress);
+        boolean isConnected = false;
 
         if (status == BluetoothGatt.GATT_SUCCESS) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                mModule.setStatus(1);
-                mStatusUpdateIntent.putExtra(AtmosStrings.BLE_STATUS_CHANGED, true);
                 boolean bool = gatt.discoverServices();
+                mStatusUpdateIntent.putExtra(AtmosStrings.BLE_STATE_CHANGED, true);
+                isConnected = true;
             }
             if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 gatt.close();
-                mModule.setStatus(0);
-                mStatusUpdateIntent.putExtra(AtmosStrings.BLE_STATUS_CHANGED, false);
+                mStatusUpdateIntent.putExtra(AtmosStrings.BLE_STATE_CHANGED, false);
+                isConnected = false;
             }
         } else {
             Log.d(TAG, "onConnectionStateChange: Echec de la connextion - Timeout reached.");
-            mStatusUpdateIntent.putExtra(AtmosStrings.BLE_CONNECTION_LOST, mAddress);
+            mStatusUpdateIntent.putExtra(AtmosStrings.BLE_CONNECTION_LOST, true);
             gatt.close();
         }
 
-        mDAO.update(mModule);
-        mStatusUpdateIntent.putExtra(AtmosStrings.BLE_MODULE_ADDRESS, gatt.getDevice().getAddress());
+        mRepository.updateModule(mModule, isConnected);
+        mStatusUpdateIntent.putExtra(AtmosStrings.BLE_DEVICE_ADDRESS, gatt.getDevice().getAddress());
         mContext.sendBroadcast(mStatusUpdateIntent);
     }
 
@@ -88,8 +90,14 @@ public class BLEHardwareConnection extends BluetoothGattCallback {
     public void onServicesDiscovered(BluetoothGatt gatt, int status) {
         super.onServicesDiscovered(gatt, status);
 
-        mArrayList = gatt.getServices();
-        for (BluetoothGattService service : mArrayList) {
+        if (status == GATT_INTERNAL_ERROR) {
+            Log.e(TAG, "onServicesDiscovered: " + AtmosStrings.DebugMessages.SERVICE_DISCOVERY_FAILED);
+            gatt.disconnect();
+            return;
+        }
+
+        mServicesList = gatt.getServices();
+        for (BluetoothGattService service : mServicesList) {
             Log.d(TAG, "onServicesDiscovered: Service: " + service);
         }
 
@@ -121,30 +129,35 @@ public class BLEHardwareConnection extends BluetoothGattCallback {
     @Override
     public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
         super.onCharacteristicChanged(gatt, characteristic);
-        BLECharacteristicData characteristicData = mComputer.computeCharacteristic(characteristic);
+        BluetoothCharacteristicData characteristicData = mComputer.computeCharacteristic(characteristic);
+
+        if(characteristicData == null){
+            Log.e(TAG, "onCharacteristicChanged: " + AtmosStrings.DebugMessages.SENSOR_DISCOVERY_FAILED);
+            gatt.disconnect();
+            return;
+        }
+
         double temperature = mComputer.computeData(characteristicData);
 
         BluetoothDevice mmDevice = gatt.getDevice();
-        BLEModuleEntity mDevice = mDAO.getByAddress(mmDevice.getAddress());
-        mDevice.setLastTempEstimation(temperature);
+        BluetoothDeviceInfo mDevice = mRepository.getByAddress(mmDevice.getAddress());
+        mRepository.updateModule(mDevice, temperature);
 
         Intent mStatusUpdateIntent = new Intent(AtmosStrings.SYNTHESIS_FRAGMENT);
         mStatusUpdateIntent.setAction(AtmosStrings.SYNTHESIS_FRAGMENT);
-        mStatusUpdateIntent.putExtra(AtmosStrings.BLE_MODULE_ADDRESS, mmDevice.getAddress());
-        mStatusUpdateIntent.putExtra(AtmosStrings.BLE_DATA_UPDATED, temperature);
+        mStatusUpdateIntent.putExtra(AtmosStrings.BLE_DEVICE_ADDRESS, mmDevice.getAddress());
+        mStatusUpdateIntent.putExtra(AtmosStrings.BLE_DATA_UPDATED, true);
+        mStatusUpdateIntent.putExtra(AtmosStrings.BLE_DEVICE_DATA, temperature);
         mContext.sendBroadcast(mStatusUpdateIntent);
-
     }
 
     @Override
     public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
         super.onDescriptorWrite(gatt, descriptor, status);
         if (CUSTOM_CHARACTERISTIC_CONFIG_UUID.equals(descriptor.getUuid())) {
-            Log.d(TAG, "onDescriptorWrite: " + descriptor.getUuid());
             BluetoothGattCharacteristic characteristic = gatt
                     .getService(CUSTOM_SERVICE_UUID)
                     .getCharacteristic(CUSTOM_CHARACTERISTIC_UUID);
-            Log.d(TAG, "onDescriptorWrite: Reading characteristic");
             gatt.readCharacteristic(characteristic);
         }
     }
@@ -154,17 +167,18 @@ public class BLEHardwareConnection extends BluetoothGattCallback {
         super.onDescriptorRead(gatt, descriptor, status);
     }
 
-    public BluetoothGatt connect(BluetoothAdapter mAdapter, String mAddress){
+    public BluetoothGatt connect(BluetoothAdapter mAdapter, String mAddress) {
         BluetoothDevice mDevice = mAdapter.getRemoteDevice(mAddress);
         BluetoothManager mManager = (BluetoothManager) this.mContext.getSystemService(Context.BLUETOOTH_SERVICE);
 
         BluetoothGatt mGatt = mDevice.connectGatt(
                 this.mContext,
                 false, // AUTO-CONNECT
-                this);
+                this,
+                BluetoothDevice.TRANSPORT_LE);
 
-        handler.postDelayed(() -> {
-            if(mGatt != null && mManager.getConnectionState(mDevice, BluetoothProfile.GATT) == BluetoothProfile.STATE_DISCONNECTED){
+        mHandler.postDelayed(() -> {
+            if (mGatt != null && mManager.getConnectionState(mDevice, BluetoothProfile.GATT) == BluetoothProfile.STATE_DISCONNECTED) {
                 mGatt.disconnect();
                 mGatt.close();
                 onConnectionFailed(mDevice, mAddress);
@@ -174,18 +188,18 @@ public class BLEHardwareConnection extends BluetoothGattCallback {
         return mGatt;
     }
 
-    public void onConnectionFailed(BluetoothDevice mDevice, String mAddress){
+    public void onConnectionFailed(BluetoothDevice mDevice, String mAddress) {
         ExecutorService mExecutor = Executors.newSingleThreadExecutor();
         mExecutor.execute(() -> {
-            BLEModuleEntity mModule = mDAO.getByAddress(mAddress);
-            mModule.setStatus(0);
-            mDAO.update(mModule);
+            BluetoothDeviceInfo mModule = mRepository.getByAddress(mAddress);
+//            mModule.setStatus(0);
+//            mRepository.updateModule(mModule);
         });
 
         Intent mStatusUpdateIntent = new Intent(AtmosStrings.SYNTHESIS_FRAGMENT);
         mStatusUpdateIntent.setAction(AtmosStrings.SYNTHESIS_FRAGMENT);
-        mStatusUpdateIntent.putExtra(AtmosStrings.BLE_MODULE_ADDRESS, mDevice.getAddress());
-        mStatusUpdateIntent.putExtra(AtmosStrings.BLE_TIMEOUT_REACHED, mAddress);
+        mStatusUpdateIntent.putExtra(AtmosStrings.BLE_DEVICE_ADDRESS, mDevice.getAddress());
+        mStatusUpdateIntent.putExtra(AtmosStrings.BLE_TIMEOUT_REACHED, true);
         mContext.sendBroadcast(mStatusUpdateIntent);
     }
 }

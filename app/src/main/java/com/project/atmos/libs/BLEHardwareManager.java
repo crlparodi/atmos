@@ -13,7 +13,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Handler;
-import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.util.Log;
 import android.widget.Toast;
@@ -27,6 +26,7 @@ import com.project.atmos.values.AtmosStrings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class BLEHardwareManager {
     public static final String TAG = BLEHardwareManager.class.getSimpleName();
@@ -39,6 +39,8 @@ public class BLEHardwareManager {
     private ArrayList<BluetoothDevice> mDevices;
     private MutableLiveData<ArrayList<BluetoothDevice>> mDevicesList;
 
+    public static final UUID CUSTOM_SERVICE_UUID = AtmosConstants.convertFromInteger(0xFFE0);
+
     private Handler handler;
 
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -46,9 +48,8 @@ public class BLEHardwareManager {
             String action = intent.getAction();
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                Log.d(TAG, "onReceive: " + device.getName() + ", " + device.getAddress());
                 mDevices.add(device);
-                setmDevicesList(mDevices);
+                setDevicesList(mDevices);
             }
             if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
                 final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
@@ -58,12 +59,10 @@ public class BLEHardwareManager {
                     /* Get different BLE States */
                     /* For example to update the Switch on a Fragment */
                     case BluetoothAdapter.STATE_ON:
-                        Log.d(TAG, "onReceive: Sending STATE ON");
                         uiUpdateIntent.putExtra(AtmosStrings.BLE_STATE_CHANGED, true);
                         context.sendBroadcast(uiUpdateIntent);
                         break;
                     case BluetoothAdapter.STATE_OFF:
-                        Log.d(TAG, "onReceive: Sending STATE OFF");
                         uiUpdateIntent.putExtra(AtmosStrings.BLE_STATE_CHANGED, false);
                         context.sendBroadcast(uiUpdateIntent);
                         break;
@@ -84,11 +83,11 @@ public class BLEHardwareManager {
         return btAdapter;
     }
 
-    public LiveData<ArrayList<BluetoothDevice>> getmDevicesList() {
+    public LiveData<ArrayList<BluetoothDevice>> getDevicesList() {
         return mDevicesList;
     }
 
-    public void setmDevicesList(ArrayList<BluetoothDevice> mDevicesList) {
+    public void setDevicesList(ArrayList<BluetoothDevice> mDevicesList) {
         this.mDevicesList.setValue(mDevicesList);
     }
 
@@ -134,7 +133,7 @@ public class BLEHardwareManager {
                 super.onScanResult(callbackType, result);
                 if(!mDevices.contains(result.getDevice())){
                     mDevices.add(result.getDevice());
-                    setmDevicesList(mDevices);
+                    setDevicesList(mDevices);
                 }
             }
 
@@ -156,6 +155,7 @@ public class BLEHardwareManager {
                     .build();
 
             ScanFilter mmScanFilter = new ScanFilter.Builder()
+                    .setServiceUuid(new ParcelUuid(CUSTOM_SERVICE_UUID))
                     .build();
             List<ScanFilter> mmFilters = new ArrayList<>();
             mmFilters.add(mmScanFilter);
@@ -163,7 +163,11 @@ public class BLEHardwareManager {
             if (enable) {
                 handler.postDelayed(() -> {
                     if (mmScanner != null) {
-                        mmScanner.stopScan(mmScanCallback);
+                        try {
+                            mmScanner.stopScan(mmScanCallback);
+                        } catch (Exception e) {
+                            Toast.makeText(context, AtmosStrings.ToastMessages.BLUETOOTH_ABORTED, Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }, AtmosConstants.BLUETOOTH_LE_SCAN_PERIOD);
 
@@ -172,7 +176,7 @@ public class BLEHardwareManager {
                 mmScanner.stopScan(mmScanCallback);
             }
         } else {
-            Toast.makeText(this.context, AtmosStrings.ToastMessages.BLE_STATE_NOT_ACTIVE, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this.context, AtmosStrings.ToastMessages.BLUETOOTH_NEEDED, Toast.LENGTH_SHORT).show();
         }
     }
 }

@@ -11,20 +11,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.project.atmos.MainActivity;
 import com.project.atmos.R;
-import com.project.atmos.models.BLEModuleEntity;
+import com.project.atmos.models.BluetoothDeviceInfo;
+import com.project.atmos.models.DeviceMeta;
 import com.project.atmos.values.AtmosAppCycle;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 public class SynthesisListAdapter extends RecyclerView.Adapter<SynthesisListAdapter.BLEModuleListViewHolder>{
     public static final String TAG = SynthesisListAdapter.class.getSimpleName();
 
     public static final AtmosAppCycle APP_CYCLE_STATUS = MainActivity.config.isCycleStatus();
 
-    ArrayList<BLEModuleEntity> modulesList = new ArrayList<>();
+    ArrayList<BluetoothDeviceInfo> mList = new ArrayList<>();
 
     private OnLongClickListener listener;
 
@@ -38,74 +38,71 @@ public class SynthesisListAdapter extends RecyclerView.Adapter<SynthesisListAdap
 
     @Override
     public void onBindViewHolder(@NonNull BLEModuleListViewHolder holder, int position) {
-        BLEModuleEntity currentModule = modulesList.get(position);
+        BluetoothDeviceInfo mDevice = mList.get(position);
 
-        if(currentModule.getName() != null)
-            holder.mName.setText(currentModule.getName());
+        if(mDevice.getDevice().getName() != null)
+            holder.mName.setText(mDevice.getDevice().getName());
         else
             holder.mName.setText("-unnamed-");
 
-        holder.mAddress.setText(currentModule.getAddress());
+        holder.mAddress.setText(mDevice.getDevice().getAddress());
 
-        String statusText = (currentModule.getStatus() == 1) ? "Active" : "Not active";
+        String statusText = mDevice.isConnected() ? "Connected" : "Not connected";
         holder.mStatus.setText(statusText);
 
         NumberFormat formater = new DecimalFormat("#0.0");
-        String temperature = formater.format(currentModule.getLastTempEstimation()) + "°C";
+        String temperature = formater.format(mDevice.getData()) + "°C";
         holder.mMeasurement.setText(temperature);
     }
 
     @Override
     public int getItemCount() {
-        return this.modulesList.size();
+        return this.mList.size();
     }
 
-    public BLEModuleEntity getItem(int position) {
-        return modulesList.get(position);
+    public BluetoothDeviceInfo getItem(int position) {
+        return mList.get(position);
     }
 
     public int getPositionByAddress(String mAddress){
         int position = 0;
-        BLEModuleEntity mModule = null;
-        Iterator it = modulesList.listIterator();
-        while(it.hasNext()){
-            mModule = (BLEModuleEntity) it.next();
-            if(mAddress.equals(mModule.getAddress())){
-                position = modulesList.indexOf(mModule);
+
+        for (BluetoothDeviceInfo mDevice : mList){
+            if(mAddress.equals(mDevice.getDevice().getAddress())){
+                position = mList.indexOf(mDevice);
             }
         }
         return position;
     }
 
-    public BLEModuleEntity getItemByAddress(String mAddress){
-        BLEModuleEntity mModule = null;
-        Iterator it = modulesList.listIterator();
-        while(it.hasNext()){
-            mModule = (BLEModuleEntity) it.next();
-            if(mAddress.equals(mModule.getAddress())){
+    public BluetoothDeviceInfo getItemByAddress(String mAddress){
+        BluetoothDeviceInfo mModule = null;
+        for(BluetoothDeviceInfo tModule : mList){
+            if(mAddress.equals(tModule.getDevice().getAddress())){
+                mModule = tModule;
                 break;
             }
         }
         return mModule;
     }
 
-    public void updateItem(int position, BLEModuleEntity mModule){
-        modulesList.set(position, mModule);
+    public void updateItem(int position, BluetoothDeviceInfo mModule){
+        mList.set(position, mModule);
         notifyItemChanged(position);
     }
 
     public void removeItem(int position){
-        modulesList.remove(position);
+        mList.remove(position);
         notifyItemRemoved(position);
-        notifyItemRangeChanged(position, modulesList.size());
+        notifyItemRangeChanged(position, mList.size());
     }
 
-    public ArrayList<BLEModuleEntity> getModulesList() {
-        return modulesList;
+    public ArrayList<BluetoothDeviceInfo> getModulesList() {
+        return mList;
     }
 
-    public void setModulesList(ArrayList<BLEModuleEntity> modules) {
-        this.modulesList = modules;
+    public void setModulesList(ArrayList<BluetoothDeviceInfo> modules) {
+        this.mList = modules;
         notifyDataSetChanged();
     }
 
@@ -129,13 +126,14 @@ public class SynthesisListAdapter extends RecyclerView.Adapter<SynthesisListAdap
         @Override
         public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo){
             int position = getAdapterPosition();
-            menu.setHeaderTitle(modulesList.get(position).getName());
+            menu.setHeaderTitle(mList.get(position).getDevice().getName());
             if(APP_CYCLE_STATUS == AtmosAppCycle.PRODUCTION){
                 menu.add(0, R.id.atmos_oc_menu_connect, position, R.string.atmos_oc_connect);
                 menu.add(0, R.id.atmos_oc_menu_disconnect, position, R.string.atmos_oc_disconnect);
             }
             menu.add(0, R.id.atmos_oc_menu_update, position, R.string.atmos_oc_update);
             menu.add(0, R.id.atmos_oc_menu_delete, position, R.string.atmos_oc_delete);
+            menu.add(0, R.id.atmos_oc_menu_details, position, R.string.atmos_oc_details);
         }
 
         @Override

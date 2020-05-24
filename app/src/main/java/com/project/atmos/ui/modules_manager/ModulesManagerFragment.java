@@ -91,13 +91,13 @@ public class ModulesManagerFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        DeviceDiscoveryRepository.instance().addDevicesList(bleHardwareManager.getmDevicesList());
+        DeviceDiscoveryRepository.instance().addDevicesList(bleHardwareManager.getDevicesList());
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        DeviceDiscoveryRepository.instance().removeDevicesList(bleHardwareManager.getmDevicesList());
+        DeviceDiscoveryRepository.instance().removeDevicesList(bleHardwareManager.getDevicesList());
         mListAdapter.setmDeviceslist(null);
 
     }

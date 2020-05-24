@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.project.atmos.libs.BLEHardwareManager;
-import com.project.atmos.libs.CustomAdaptableDialog;
+import com.project.atmos.dialogs.CustomAdaptableDialog;
 
 public class AppPermissionsActivity extends AppCompatActivity {
     public static final String TAG = AppPermissionsActivity.class.getSimpleName();

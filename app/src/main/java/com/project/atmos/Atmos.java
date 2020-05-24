@@ -5,15 +5,9 @@ import android.content.Context;
 
 public class Atmos extends Application {
     public static final String TAG = Atmos.class.getSimpleName();
-    private static Context context;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Atmos.context = getApplicationContext();
-    }
-
-    public static Context getAppContext(){
-        return Atmos.context;
     }
 }

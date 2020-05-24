@@ -1,7 +1,7 @@
 package com.project.atmos.values;
 
 public enum AtmosAppCycle {
-    DEVELOPMENT,
+    DEMO,
     TESTING,
     PRODUCTION
 }

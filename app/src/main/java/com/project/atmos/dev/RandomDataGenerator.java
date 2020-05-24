@@ -4,33 +4,19 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
 
-import com.project.atmos.Atmos;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.Random;
 
-public class RandomDataGenerator implements RandomDataGeneratorManager {
+public class RandomDataGenerator {
+    public static final String TAG = RandomDataGenerator.class.getSimpleName();
 
-    // The custom random bluetooth address generator for the needs of the app dev.
-    private RandomAddressGenerator RAGGLE_GEN = new RandomAddressGenerator();
-
-    // The custom random bluetooth last connection date generator for the needs of the app dev.
-    private RandomDateGenerator RADDLE_GEN = new RandomDateGenerator();
-
-    // The generated and potentially updated data will be based only on bluetooth module
-    // attributes.
-    private String R_NAME;
-    private int R_STATUS;
-    private Double R_TEMP;
-
-    // The elements for getting the date of the last pairing with a BLE module device
-    public GregorianCalendar R_DATE;
-    private String R_LAST_CONNECT;
+    private int NB_OF_ADDR_INTEGERS = 6;
 
     // The random engine with some type configurations
     private Random randomEngine;
@@ -40,18 +26,11 @@ public class RandomDataGenerator implements RandomDataGeneratorManager {
     private String filePath = "ble_names.txt";
     private InputStream fileBuffer;
 
-    public RandomDataGenerator(){
-        this.R_NAME = "";
-        this.R_STATUS = 0;
-        this.R_TEMP = 0.0;
-//        this.R_LAST_CONNECT = new Date().getTime();
-//        this.R_LAST_CONNECT.toString();
-
+    public RandomDataGenerator(Context context) {
         this.randomEngine = new Random();
 
-        this.assetMgr = Atmos.getAppContext().getAssets();
+        this.assetMgr = context.getAssets();
 
-        // Dictionnary words file reading attempt
         try {
             this.fileBuffer = new BufferedInputStream(this.assetMgr.open(filePath, AssetManager.ACCESS_BUFFER));
             fileBuffer.mark(0);
@@ -60,16 +39,15 @@ public class RandomDataGenerator implements RandomDataGeneratorManager {
         }
     }
 
-    @Override
-    // RandomData
     public String getRandomName() {
+        String R_NAME = "";
         if (this.NUMBER_OF_WORDS_IN_DICTIONNARY > 0) this.NUMBER_OF_WORDS_IN_DICTIONNARY = 0;
 
         BufferedReader br = new BufferedReader(new InputStreamReader(fileBuffer));
 
         try {
             fileBuffer.reset();
-            while(br.readLine() != null){
+            while (br.readLine() != null) {
                 this.NUMBER_OF_WORDS_IN_DICTIONNARY++;
             }
 
@@ -77,45 +55,68 @@ public class RandomDataGenerator implements RandomDataGeneratorManager {
             fileBuffer.reset();
             br = new BufferedReader(new InputStreamReader(fileBuffer));
 
-            for(int i = 0; i != this.NUMBER_OF_WORDS_IN_DICTIONNARY; i++){
-                if (i == selector){
-                    this.R_NAME = br.readLine();
+            for (int i = 0; i != this.NUMBER_OF_WORDS_IN_DICTIONNARY; i++) {
+                if (i == selector) {
+                    R_NAME = br.readLine();
                     break;
-                }
-                else {
+                } else {
                     br.readLine();
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(TAG, "getRandomName: Failed to get a random name", e);
+            return null;
         }
 
-        return this.R_NAME;
+        return R_NAME;
     }
 
-    @Override
-    // Random Data
     public String getRandomAddress() {
-        return RAGGLE_GEN.generateAddress();
+        String addressCompositor = "";
+        ArrayList<Integer> addressIntegerSet = new ArrayList<Integer>();
+        for (int i = 0; i < this.NB_OF_ADDR_INTEGERS; i++) {
+            addressIntegerSet.add(this.randomEngine.nextInt(255));
+            addressCompositor += Integer.toHexString(addressIntegerSet.get(i));
+            if (i != this.NB_OF_ADDR_INTEGERS - 1) {
+                addressCompositor += ":";
+            }
+        }
+        return addressCompositor.toUpperCase();
     }
 
-    @Override
-    // Random Data
-    public Integer getRandomStatus() {
-        this.R_STATUS = randomEngine.nextInt(2);
-        return R_STATUS;
+    public int getRandomStatus() {
+        return randomEngine.nextInt(2);
     }
 
-    public String getRandomDate() {
-        R_DATE = this.RADDLE_GEN.generateDate();
-        R_LAST_CONNECT = R_DATE.toString();
-        return this.R_LAST_CONNECT;
+    public GregorianCalendar getRandomDate() {
+        int R_YEAR = randomEngine.nextInt(40) + 1980;
+        int R_MONTH = randomEngine.nextInt(11) + 1;
+        int R_DATE;
+
+        if (R_MONTH == 2) {
+            if (R_YEAR % 4 == 0) {
+                R_DATE = randomEngine.nextInt(29) + 1;
+            } else {
+                if ((R_YEAR % 100 == 0) && (R_YEAR % 400 != 0)) {
+                    R_DATE = randomEngine.nextInt(29) + 1;
+                } else {
+                    R_DATE = randomEngine.nextInt(28) + 1;
+                }
+            }
+        } else if (R_MONTH % 2 != 0) {
+            R_DATE = randomEngine.nextInt(31) + 1;
+        } else {
+            R_DATE = randomEngine.nextInt(30) + 1;
+        }
+
+        int R_HOURS = randomEngine.nextInt(23);
+        int R_MINUTES = randomEngine.nextInt(59);
+        int R_SECONDS = randomEngine.nextInt(59);
+
+        return new GregorianCalendar(R_YEAR, R_MONTH, R_DATE, R_HOURS, R_MINUTES, R_SECONDS);
     }
 
-    @Override
-    // Random Data
-    public Double getRandomTemperature() {
-        this.R_TEMP = 15 + 15 * this.randomEngine.nextDouble();
-        return this.R_TEMP;
+    public double getRandomData() {
+        return (15 + 15 * this.randomEngine.nextDouble());
     }
 }

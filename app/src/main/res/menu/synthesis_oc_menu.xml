@@ -15,4 +15,8 @@
     <item
         android:id="@id/atmos_oc_menu_delete"
         android:title="@string/atmos_oc_delete" />
+
+    <item
+        android:id="@id/atmos_oc_menu_details"
+        android:title="@string/atmos_oc_details" />
 </menu>

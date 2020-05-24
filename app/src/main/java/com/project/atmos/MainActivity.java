@@ -21,10 +21,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.project.atmos.config.Config;
-import com.project.atmos.database.BLEModulesDAO;
-import com.project.atmos.database.BLEModulesDataBase;
 import com.project.atmos.libs.BLEHardwareManager;
-import com.project.atmos.models.BLEModuleEntity;
 import com.project.atmos.values.AtmosStrings;
 
 import java.util.HashMap;

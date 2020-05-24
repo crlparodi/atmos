@@ -1,4 +1,4 @@
-package com.project.atmos.libs;
+package com.project.atmos.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

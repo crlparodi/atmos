@@ -26,6 +26,11 @@
     <string name="atmos_oc_disconnect">Déconnecter</string>
     <string name="atmos_oc_update">Modifier</string>
     <string name="atmos_oc_delete">Supprimer</string>
+    <string name="atmos_oc_details">Informations</string>
+
+    <!-- atmos_synth_fragment_oc_menu -->
+    <string name="atmos_oc_info_name">Nom:</string>
+    <string name="atmos_oc_info_last_connect">Dernière Connexion:</string>
 
     <!-- atmos_string_measurement_view -->
     <string name="atmos_string_device_name">BlackBird</string>

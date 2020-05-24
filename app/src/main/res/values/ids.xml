@@ -20,6 +20,12 @@
     <item name="atmos_oc_menu_disconnect" type="id" />
     <item name="atmos_oc_menu_update" type="id" />
     <item name="atmos_oc_menu_delete" type="id" />
+    <item name="atmos_oc_menu_details" type="id" />
+
+    <!-- atmos_synthesis_oc_info -->
+    <item name="atmos_oc_info" type="id" />
+    <item name="atmos_oc_info_name" type="id" />
+    <item name="atmos_oc_info_last_connect" type="id" />
 
     <!-- atmos_measurement_view -->
     <item name="atmos_device_name" type="id" />
