@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.content.BroadcastReceiver;
+import android.content.DialogInterface;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.project.atmos.MainActivity;
 import com.project.atmos.R;
+import com.project.atmos.dialogs.BluetoothDeviceInfoDialog;
 import com.project.atmos.libs.BLEHardwareConnection;
 import com.project.atmos.models.BluetoothDeviceInfo;
 import com.project.atmos.values.AtmosStrings;
@@ -113,6 +115,7 @@ public class SynthesisFragment extends Fragment implements SynthesisListAdapter.
                 menuOnDelete(mAddress, bDevice);
                 return true;
             case R.id.atmos_oc_menu_details:
+                menuOnDetails(bDevice);
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -158,7 +161,6 @@ public class SynthesisFragment extends Fragment implements SynthesisListAdapter.
         BluetoothGatt mGattForDisconnect = ((MainActivity) getActivity()).getGatt(address);
         if (mGattForDisconnect != null) {
             mGattForDisconnect.disconnect();
-//            ((MainActivity) getActivity()).removeGatt(address);
         } else {
             Toast.makeText(getActivity(), AtmosStrings.ToastMessages.BLE_STATE_NOT_CONNECTED, Toast.LENGTH_SHORT).show();
         }
@@ -168,10 +170,14 @@ public class SynthesisFragment extends Fragment implements SynthesisListAdapter.
         BluetoothGatt mGattForRemove = ((MainActivity) getActivity()).getGatt(address);
         if (mGattForRemove != null) {
             mGattForRemove.disconnect();
-//            ((MainActivity) getActivity()).removeGatt(address);
         }
         this.mViewModel.remove(bDevice);
         this.listAdapter.removeItem(mCurrentClickPosition);
         Toast.makeText(getContext(), AtmosStrings.ToastMessages.BLE_DEVICE_REMOVED, Toast.LENGTH_SHORT).show();
+    }
+
+    public void menuOnDetails(BluetoothDeviceInfo aDevice){
+        BluetoothDeviceInfoDialog mDialog = new BluetoothDeviceInfoDialog(aDevice);
+        mDialog.show(getFragmentManager(), TAG);
     }
 }

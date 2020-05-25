@@ -5,46 +5,57 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
+import androidx.appcompat.app.AppCompatDialogFragment;
 
 import com.project.atmos.R;
 import com.project.atmos.models.BluetoothDeviceInfo;
 
 import java.util.Date;
 
-public class BluetoothDeviceInfoDialog extends DialogFragment {
-    private Context mContext;
+public class BluetoothDeviceInfoDialog extends AppCompatDialogFragment {
     private BluetoothDeviceInfo bDevice;
-    private View mView;
-    private DialogInterface.OnClickListener mListener;
 
-    public BluetoothDeviceInfoDialog(
-            Context aContext,
-            BluetoothDeviceInfo aDevice,
-            View aView,
-            DialogInterface.OnClickListener aListener
-    ){
-        this.mContext = aContext;
+    public BluetoothDeviceInfoDialog(BluetoothDeviceInfo aDevice) {
         this.bDevice = aDevice;
-        this.mView = aView;
-        this.mListener = aListener;
+    }
+
+    public BluetoothDeviceInfoDialog() {
+        this.bDevice = null;
+    }
+
+    public void setDevice(BluetoothDeviceInfo bDevice) {
+        this.bDevice = bDevice;
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        AlertDialog.Builder adaptableBuilder = new AlertDialog.Builder(this.mContext);
-        TextView bName = this.mView.findViewById(R.id.atmos_oc_info_name);
+        AlertDialog.Builder adaptableBuilder = new AlertDialog.Builder(getContext());
+        LayoutInflater mInflater = getActivity().getLayoutInflater();
+        View mView = mInflater.inflate(R.layout.synthesis_oc_info, null);
+        TextView bName = mView.findViewById(R.id.atmos_oc_info_name);
         bName.setText(bDevice.getDevice().getName());
-        TextView bLastConnect = this.mView.findViewById(R.id.atmos_oc_info_last_connect);
-        bLastConnect.setText(bDevice.getDevice().getLastConnection().toString());
-        adaptableBuilder.setView(this.mView)
-                .setPositiveButton("OK", this.mListener);
+        TextView bLastConnect = mView.findViewById(R.id.atmos_oc_info_last_connect);
+
+        Date lastConnection = bDevice.getDevice().getLastConnection();
+        if (lastConnection != null) {
+            bLastConnect.setText(lastConnection.toString());
+        } else {
+            bLastConnect.setText("Jamais");
+        }
+        adaptableBuilder.setView(mView)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
         return adaptableBuilder.create();
     }
 }

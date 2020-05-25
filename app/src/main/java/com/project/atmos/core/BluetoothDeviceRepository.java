@@ -201,6 +201,11 @@ public class BluetoothDeviceRepository implements DeviceRepositoryManager {
                 msg.what = MODULE_UNKNOWN_MSG_ID;
                 msg.obj = null;
             } else {
+                if(aState){
+                    module.setLastConnection(new Date(System.currentTimeMillis()));
+                    mDAO.updateDevice(module);
+                }
+
                 List<BluetoothDeviceInfo> bList = mList.getValue();
                 for (BluetoothDeviceInfo bDevice : bList) {
                     if (bDevice.getDevice().getAddress().equals(module.getAddress())) {
